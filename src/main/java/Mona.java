@@ -1,14 +1,10 @@
 import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 import java.util.Optional;
 
 /**
  * Provides a command-line task manager named Mona.
  */
 public class Mona {
-    private static final String DEADLINE_SEPARATOR = " /by ";
-    private static final String EVENT_START_SEPARATOR = " /from ";
-    private static final String EVENT_END_SEPARATOR = " /to ";
     // Relative to the working directory the program is run from, per the project's
     // requirement to avoid absolute, OS-specific paths.
     private static final String DATA_FILE_PATH = "./data/mona.txt";
@@ -97,13 +93,7 @@ public class Mona {
 
     private static void addTodo(TaskList tasks, String userInput, Storage storage, Ui ui)
             throws MonaException {
-        String description = Command.TODO.extractArguments(userInput);
-        if (description.trim().isEmpty()) {
-            throw MonaException.withHint(
-                    "❌ A todo needs a name before its fate can be charted.",
-                    "todo read book");
-        }
-
+        String description = Parser.parseTodoDescription(userInput);
         addTask(tasks, new Todo(description), storage, ui);
     }
 
@@ -119,88 +109,15 @@ public class Mona {
 
     private static void addDeadline(TaskList tasks, String userInput, Storage storage, Ui ui)
             throws MonaException {
-        String arguments = Command.DEADLINE.extractArguments(userInput);
-        int separatorIndex = arguments.indexOf(DEADLINE_SEPARATOR);
-        if (separatorIndex < 0) {
-            throw MonaException.withHint(
-                    "❌ Even the stars need a fixed point. Specify the deadline using /by.",
-                    "deadline return book /by 2019-10-15");
-        }
-
-        String description = arguments.substring(0, separatorIndex);
-        String deadlineText = arguments.substring(separatorIndex + DEADLINE_SEPARATOR.length());
-        if (description.trim().isEmpty()) {
-            throw MonaException.withHint(
-                    "❌ A deadline needs a name before its fate can be charted.",
-                    "deadline return book /by 2019-10-15");
-        }
-        if (deadlineText.trim().isEmpty()) {
-            throw MonaException.withHint(
-                    "❌ A deadline needs a point in time. Tell me when it falls due after /by.",
-                    "deadline return book /by 2019-10-15");
-        }
-
-        TaskDateTime deadline = parseDate(deadlineText.trim(), "deadline return book /by 2019-10-15");
-        addTask(tasks, new Deadline(description, deadline), storage, ui);
+        Parser.DeadlineArguments arguments = Parser.parseDeadline(userInput);
+        addTask(tasks, new Deadline(arguments.description(), arguments.deadline()), storage, ui);
     }
 
     private static void addEvent(TaskList tasks, String userInput, Storage storage, Ui ui)
             throws MonaException {
-        String arguments = Command.EVENT.extractArguments(userInput);
-        int startSeparatorIndex = arguments.indexOf(EVENT_START_SEPARATOR);
-        int endSeparatorIndex = arguments.indexOf(EVENT_END_SEPARATOR,
-                startSeparatorIndex + EVENT_START_SEPARATOR.length());
-        if (startSeparatorIndex < 0 || endSeparatorIndex < 0) {
-            // /from and /to are both present, but /to comes before /from: point the user at the
-            // ordering rather than reporting them as missing.
-            if (startSeparatorIndex >= 0 && arguments.indexOf(EVENT_END_SEPARATOR) >= 0) {
-                throw MonaException.withHint(
-                        "❌ Fate flows only forward. Place /from before /to.",
-                        "event project meeting /from 2019-10-15 /to 2019-10-16");
-            }
-            throw MonaException.withHint(
-                    "❌ Fate needs both a dawn and a dusk. Specify the event using /from and /to.",
-                    "event project meeting /from 2019-10-15 /to 2019-10-16");
-        }
-
-        String description = arguments.substring(0, startSeparatorIndex);
-        String startText = arguments.substring(
-                startSeparatorIndex + EVENT_START_SEPARATOR.length(), endSeparatorIndex);
-        String endText = arguments.substring(endSeparatorIndex + EVENT_END_SEPARATOR.length());
-        if (description.trim().isEmpty()) {
-            throw MonaException.withHint(
-                    "❌ An event needs a name before its fate can be charted.",
-                    "event project meeting /from 2019-10-15 /to 2019-10-16");
-        }
-        if (startText.trim().isEmpty() || endText.trim().isEmpty()) {
-            throw MonaException.withHint(
-                    "❌ An event needs both a dawn and a dusk. Fill in /from and /to.",
-                    "event project meeting /from 2019-10-15 /to 2019-10-16");
-        }
-
-        String hint = "event project meeting /from 2019-10-15 /to 2019-10-16";
-        TaskDateTime start = parseDate(startText.trim(), hint);
-        TaskDateTime end = parseDate(endText.trim(), hint);
-        addTask(tasks, new Event(description, start, end), storage, ui);
-    }
-
-    /**
-     * Parses user-entered text as a date, optionally with a time of day.
-     *
-     * @param dateText the text to parse, either {@code yyyy-mm-dd HHmm} or {@code yyyy-mm-dd}.
-     * @param hint an example command demonstrating the correct usage, shown if parsing fails.
-     * @return the parsed date.
-     * @throws MonaException if the text matches neither accepted format.
-     */
-    private static TaskDateTime parseDate(String dateText, String hint) throws MonaException {
-        try {
-            return TaskDateTime.parse(dateText);
-        } catch (DateTimeParseException exception) {
-            throw MonaException.withHint(
-                    "❌ The stars only read dates as yyyy-mm-dd, optionally followed by a "
-                            + "24-hour time, such as 2019-10-15 or 2019-10-15 1800.",
-                    hint);
-        }
+        Parser.EventArguments arguments = Parser.parseEvent(userInput);
+        addTask(tasks, new Event(arguments.description(), arguments.start(), arguments.end()),
+                storage, ui);
     }
 
     private static void printTasks(TaskList tasks, Ui ui) {
@@ -223,14 +140,7 @@ public class Mona {
      */
     private static void printTasksOnDate(TaskList tasks, String userInput, Ui ui)
             throws MonaException {
-        String argument = Command.ON.extractArguments(userInput).trim();
-        if (argument.isEmpty()) {
-            throw MonaException.withHint(
-                    "❌ Tell me which date's fate to reveal.",
-                    "on 2019-10-15");
-        }
-
-        TaskDateTime date = parseDate(argument, "on 2019-10-15");
+        TaskDateTime date = Parser.parseOnDate(userInput);
         LocalDate localDate = date.toLocalDate();
         printMatchingTasks(tasks, localDate, "✨ On " + date + ", the stars reveal:", ui);
     }
@@ -244,27 +154,7 @@ public class Mona {
      */
     private static void printTasksInDays(TaskList tasks, String userInput, Ui ui)
             throws MonaException {
-        String argument = Command.IN.extractArguments(userInput).trim();
-        if (argument.isEmpty()) {
-            throw MonaException.withHint(
-                    "❌ Tell me how many days ahead the stars should look.",
-                    "in 3");
-        }
-
-        int daysAhead;
-        try {
-            daysAhead = Integer.parseInt(argument);
-        } catch (NumberFormatException exception) {
-            throw MonaException.withHint(
-                    "❌ The stars only count whole days. Please enter a valid number.",
-                    "in 3");
-        }
-        if (daysAhead < 0) {
-            throw MonaException.withHint(
-                    "❌ The stars cannot yet see a negative number of days.",
-                    "in 3");
-        }
-
+        int daysAhead = Parser.parseDaysAhead(userInput);
         LocalDate targetDate = LocalDate.now().plusDays(daysAhead);
         printMatchingTasks(tasks, targetDate,
                 "✨ In " + daysAhead + " day(s), the stars reveal:", ui);
@@ -299,22 +189,7 @@ public class Mona {
     private static void markTask(TaskList tasks, String userInput, boolean shouldMarkAsDone,
             Storage storage, Ui ui) throws MonaException {
         Command command = shouldMarkAsDone ? Command.MARK : Command.UNMARK;
-        String argument = command.extractArguments(userInput).trim();
-
-        if (argument.isEmpty()) {
-            throw MonaException.withHint(
-                    "❌ Tell me which task's fate to alter.",
-                    command + " 2");
-        }
-
-        int taskNumber;
-        try {
-            taskNumber = Integer.parseInt(argument);
-        } catch (NumberFormatException exception) {
-            throw MonaException.withHint(
-                    "❌ No such fate is written in the constellations. Please enter a valid task number.",
-                    command + " 2");
-        }
+        int taskNumber = Parser.parseTaskNumber(userInput, command);
 
         if (tasks.isEmpty()) {
             throw MonaException.withHint(
@@ -343,22 +218,7 @@ public class Mona {
 
     private static void deleteTask(TaskList tasks, String userInput, Storage storage, Ui ui)
             throws MonaException {
-        String argument = Command.DELETE.extractArguments(userInput).trim();
-
-        if (argument.isEmpty()) {
-            throw MonaException.withHint(
-                    "❌ Tell me which task should be deleted.",
-                    "delete 2");
-        }
-
-        int taskNumber;
-        try {
-            taskNumber = Integer.parseInt(argument);
-        } catch (NumberFormatException exception) {
-            throw MonaException.withHint(
-                    "❌ No such fate is written in the constellations. Please enter a valid task number.",
-                    "delete 2");
-        }
+        int taskNumber = Parser.parseTaskNumber(userInput, Command.DELETE);
 
         if (tasks.isEmpty()) {
             throw MonaException.withHint(
