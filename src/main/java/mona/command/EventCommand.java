@@ -1,4 +1,11 @@
-package mona;
+package mona.command;
+
+import mona.MonaException;
+import mona.storage.Storage;
+import mona.task.Event;
+import mona.task.TaskDateTime;
+import mona.task.TaskList;
+import mona.ui.Ui;
 
 /**
  * Adds an event to the task list.

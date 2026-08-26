@@ -1,4 +1,8 @@
-package mona;
+package mona.command;
+
+import mona.storage.Storage;
+import mona.task.TaskList;
+import mona.ui.Ui;
 
 /**
  * Ends the current Mona session after showing a farewell message.

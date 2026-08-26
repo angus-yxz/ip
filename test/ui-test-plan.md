@@ -1,6 +1,6 @@
 # UI test plan
 
-Run `javac --release 25 -d build/classes src/main/java/mona/*.java` before this plan.
+Run `find src/main/java -name "*.java" | xargs javac --release 25 -d build/classes` before this plan.
 Each test starts a new copy of the program.
 
 Mona now saves tasks to `./data/mona.txt` and reloads them on startup. Delete the

@@ -1,4 +1,4 @@
-package mona;
+package mona.command;
 
 import java.util.Optional;
 

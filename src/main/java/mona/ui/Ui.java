@@ -1,4 +1,4 @@
-package mona;
+package mona.ui;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
