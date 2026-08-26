@@ -1,27 +1,18 @@
-import java.io.PrintStream;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Optional;
-import java.util.Scanner;
 
 /**
  * Provides a command-line task manager named Mona.
  */
 public class Mona {
-    private static final String SEPARATOR = "____________________________________________________________";
     private static final String DEADLINE_SEPARATOR = " /by ";
     private static final String EVENT_START_SEPARATOR = " /from ";
     private static final String EVENT_END_SEPARATOR = " /to ";
     // Relative to the working directory the program is run from, per the project's
     // requirement to avoid absolute, OS-specific paths.
     private static final String DATA_FILE_PATH = "./data/mona.txt";
-    private static final String BANNER = " __  __  ___  _   _    _ \n"
-            + "|  \\/  |/ _ \\| \\ | |  / \\\n"
-            + "| |\\/| | | | |  \\| | / _ \\\n"
-            + "| |  | | |_| | |\\  |/ ___ \\\n"
-            + "|_|  |_|\\___/|_| \\_/_/   \\_\\\n";
 
     /**
      * Starts Mona and processes task commands until the user exits.
@@ -29,11 +20,7 @@ public class Mona {
      * @param args command-line arguments, which are not used.
      */
     public static void main(String[] args) {
-        // The default console encoding on Windows cannot represent the emoji used in Mona's
-        // messages, so stdout is switched to UTF-8 explicitly rather than relying on the
-        // platform default.
-        System.setOut(new PrintStream(System.out, true, StandardCharsets.UTF_8));
-
+        Ui ui = new Ui();
         Storage storage = new Storage(DATA_FILE_PATH);
         ArrayList<Task> tasks;
         try {
@@ -42,18 +29,13 @@ public class Mona {
             // Loading failed (e.g. the data file could not be read), so start with an
             // empty list rather than crashing; the user's tasks for this session are
             // still tracked in memory even though the earlier save could not be recovered.
-            printFormatted(exception.getMessage());
+            ui.showMessage(exception.getMessage());
             tasks = new ArrayList<>();
         }
 
-        printFormatted(BANNER
-                + "\n✨ Hello, I'm Mona.\nThe constellations lie reflected in the water tonight. "
-                + "What fate shall we divine?");
-
-        Scanner scanner = new Scanner(System.in);
+        ui.showWelcome();
         while (true) {
-            System.out.print("Mona > ");
-            String userInput = scanner.nextLine().trim();
+            String userInput = ui.readCommand();
 
             try {
                 if (userInput.isEmpty()) {
@@ -76,45 +58,46 @@ public class Mona {
                 Command command = parsedCommand.get();
                 switch (command) {
                     case BYE:
-                        printFormatted("✨ Farewell. May the stars guide you until we meet again.");
+                        ui.showMessage("✨ Farewell. May the stars guide you until we meet again.");
                         return;
                     case LIST:
-                        printTasks(tasks);
+                        printTasks(tasks, ui);
                         break;
                     case MARK:
-                        markTask(tasks, userInput, true, storage);
+                        markTask(tasks, userInput, true, storage, ui);
                         break;
                     case UNMARK:
-                        markTask(tasks, userInput, false, storage);
+                        markTask(tasks, userInput, false, storage, ui);
                         break;
                     case DELETE:
-                        deleteTask(tasks, userInput, storage);
+                        deleteTask(tasks, userInput, storage, ui);
                         break;
                     case TODO:
-                        addTodo(tasks, userInput, storage);
+                        addTodo(tasks, userInput, storage, ui);
                         break;
                     case DEADLINE:
-                        addDeadline(tasks, userInput, storage);
+                        addDeadline(tasks, userInput, storage, ui);
                         break;
                     case EVENT:
-                        addEvent(tasks, userInput, storage);
+                        addEvent(tasks, userInput, storage, ui);
                         break;
                     case ON:
-                        printTasksOnDate(tasks, userInput);
+                        printTasksOnDate(tasks, userInput, ui);
                         break;
                     case IN:
-                        printTasksInDays(tasks, userInput);
+                        printTasksInDays(tasks, userInput, ui);
                         break;
                     default:
                         throw new AssertionError("Unhandled command: " + command);
                 }
             } catch (MonaException exception) {
-                printFormatted(exception.getMessage());
+                ui.showMessage(exception.getMessage());
             }
         }
     }
 
-    private static void addTodo(ArrayList<Task> tasks, String userInput, Storage storage) throws MonaException {
+    private static void addTodo(ArrayList<Task> tasks, String userInput, Storage storage, Ui ui)
+            throws MonaException {
         String description = Command.TODO.extractArguments(userInput);
         if (description.trim().isEmpty()) {
             throw MonaException.withHint(
@@ -122,19 +105,20 @@ public class Mona {
                     "todo read book");
         }
 
-        addTask(tasks, new Todo(description), storage);
+        addTask(tasks, new Todo(description), storage, ui);
     }
 
-    private static void addTask(ArrayList<Task> tasks, Task task, Storage storage) throws MonaException {
+    private static void addTask(ArrayList<Task> tasks, Task task, Storage storage, Ui ui)
+            throws MonaException {
         tasks.add(task);
         // Save before reporting success, so a failed save is reported as an error
         // instead of falsely telling the user the task was added.
         storage.save(tasks);
-        printFormatted("✅ Your fate is rewritten. I've added this task:\n  " + task
+        ui.showMessage("✅ Your fate is rewritten. I've added this task:\n  " + task
                 + "\nNow you have " + tasks.size() + " tasks in the list.");
     }
 
-    private static void addDeadline(ArrayList<Task> tasks, String userInput, Storage storage)
+    private static void addDeadline(ArrayList<Task> tasks, String userInput, Storage storage, Ui ui)
             throws MonaException {
         String arguments = Command.DEADLINE.extractArguments(userInput);
         int separatorIndex = arguments.indexOf(DEADLINE_SEPARATOR);
@@ -158,10 +142,11 @@ public class Mona {
         }
 
         TaskDateTime deadline = parseDate(deadlineText.trim(), "deadline return book /by 2019-10-15");
-        addTask(tasks, new Deadline(description, deadline), storage);
+        addTask(tasks, new Deadline(description, deadline), storage, ui);
     }
 
-    private static void addEvent(ArrayList<Task> tasks, String userInput, Storage storage) throws MonaException {
+    private static void addEvent(ArrayList<Task> tasks, String userInput, Storage storage, Ui ui)
+            throws MonaException {
         String arguments = Command.EVENT.extractArguments(userInput);
         int startSeparatorIndex = arguments.indexOf(EVENT_START_SEPARATOR);
         int endSeparatorIndex = arguments.indexOf(EVENT_END_SEPARATOR,
@@ -194,9 +179,10 @@ public class Mona {
                     "event project meeting /from 2019-10-15 /to 2019-10-16");
         }
 
-        TaskDateTime start = parseDate(startText.trim(), "event project meeting /from 2019-10-15 /to 2019-10-16");
-        TaskDateTime end = parseDate(endText.trim(), "event project meeting /from 2019-10-15 /to 2019-10-16");
-        addTask(tasks, new Event(description, start, end), storage);
+        String hint = "event project meeting /from 2019-10-15 /to 2019-10-16";
+        TaskDateTime start = parseDate(startText.trim(), hint);
+        TaskDateTime end = parseDate(endText.trim(), hint);
+        addTask(tasks, new Event(description, start, end), storage, ui);
     }
 
     /**
@@ -218,13 +204,7 @@ public class Mona {
         }
     }
 
-    private static void printFormatted(String text) {
-        System.out.println(SEPARATOR);
-        System.out.println(text);
-        System.out.println(SEPARATOR);
-    }
-
-    private static void printTasks(ArrayList<Task> tasks) {
+    private static void printTasks(ArrayList<Task> tasks, Ui ui) {
         StringBuilder taskList = new StringBuilder("✨ Here is what the stars reveal:");
         for (int index = 0; index < tasks.size(); index++) {
             taskList.append(System.lineSeparator())
@@ -232,7 +212,7 @@ public class Mona {
                     .append(".")
                     .append(tasks.get(index));
         }
-        printFormatted(taskList.toString());
+        ui.showMessage(taskList.toString());
     }
 
     /**
@@ -242,7 +222,8 @@ public class Mona {
      * @param userInput the trimmed line entered by the user, e.g. {@code on 2019-10-15}.
      * @throws MonaException if no date is given, or the date cannot be parsed.
      */
-    private static void printTasksOnDate(ArrayList<Task> tasks, String userInput) throws MonaException {
+    private static void printTasksOnDate(ArrayList<Task> tasks, String userInput, Ui ui)
+            throws MonaException {
         String argument = Command.ON.extractArguments(userInput).trim();
         if (argument.isEmpty()) {
             throw MonaException.withHint(
@@ -252,7 +233,7 @@ public class Mona {
 
         TaskDateTime date = parseDate(argument, "on 2019-10-15");
         LocalDate localDate = date.toLocalDate();
-        printMatchingTasks(tasks, localDate, "✨ On " + date + ", the stars reveal:");
+        printMatchingTasks(tasks, localDate, "✨ On " + date + ", the stars reveal:", ui);
     }
 
     /**
@@ -262,7 +243,8 @@ public class Mona {
      * @param userInput the trimmed line entered by the user, e.g. {@code in 3}.
      * @throws MonaException if no number of days is given, or it is not a non-negative integer.
      */
-    private static void printTasksInDays(ArrayList<Task> tasks, String userInput) throws MonaException {
+    private static void printTasksInDays(ArrayList<Task> tasks, String userInput, Ui ui)
+            throws MonaException {
         String argument = Command.IN.extractArguments(userInput).trim();
         if (argument.isEmpty()) {
             throw MonaException.withHint(
@@ -286,7 +268,7 @@ public class Mona {
 
         LocalDate targetDate = LocalDate.now().plusDays(daysAhead);
         printMatchingTasks(tasks, targetDate,
-                "✨ In " + daysAhead + " day(s), the stars reveal:");
+                "✨ In " + daysAhead + " day(s), the stars reveal:", ui);
     }
 
     /**
@@ -297,7 +279,7 @@ public class Mona {
      * @param date the date to match tasks against.
      * @param header the line to print before the matching tasks.
      */
-    private static void printMatchingTasks(ArrayList<Task> tasks, LocalDate date, String header) {
+    private static void printMatchingTasks(ArrayList<Task> tasks, LocalDate date, String header, Ui ui) {
         StringBuilder taskList = new StringBuilder(header);
         int matchCount = 0;
         for (Task task : tasks) {
@@ -312,11 +294,11 @@ public class Mona {
         if (matchCount == 0) {
             taskList.append(System.lineSeparator()).append("  (No fates found on this date.)");
         }
-        printFormatted(taskList.toString());
+        ui.showMessage(taskList.toString());
     }
 
     private static void markTask(ArrayList<Task> tasks, String userInput, boolean shouldMarkAsDone,
-            Storage storage) throws MonaException {
+            Storage storage, Ui ui) throws MonaException {
         Command command = shouldMarkAsDone ? Command.MARK : Command.UNMARK;
         String argument = command.extractArguments(userInput).trim();
 
@@ -352,15 +334,15 @@ public class Mona {
         if (shouldMarkAsDone) {
             task.markAsDone();
             storage.save(tasks);
-            printFormatted("✅ The stars align. I've marked this task as done:\n  " + task);
+            ui.showMessage("✅ The stars align. I've marked this task as done:\n  " + task);
         } else {
             task.markAsNotDone();
             storage.save(tasks);
-            printFormatted("❌ The constellation fades. I've marked this task as not done yet:\n  " + task);
+            ui.showMessage("❌ The constellation fades. I've marked this task as not done yet:\n  " + task);
         }
     }
 
-    private static void deleteTask(ArrayList<Task> tasks, String userInput, Storage storage)
+    private static void deleteTask(ArrayList<Task> tasks, String userInput, Storage storage, Ui ui)
             throws MonaException {
         String argument = Command.DELETE.extractArguments(userInput).trim();
 
@@ -393,7 +375,7 @@ public class Mona {
 
         Task deletedTask = tasks.remove(taskNumber - 1);
         storage.save(tasks);
-        printFormatted("✅ A fate fades from the constellations. I've removed this task:\n  " + deletedTask
+        ui.showMessage("✅ A fate fades from the constellations. I've removed this task:\n  " + deletedTask
                 + "\nNow you have " + tasks.size() + " tasks in the list.");
     }
 }
