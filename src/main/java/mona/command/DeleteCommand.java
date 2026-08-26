@@ -1,3 +1,11 @@
+package mona.command;
+
+import mona.MonaException;
+import mona.storage.Storage;
+import mona.task.Task;
+import mona.task.TaskList;
+import mona.ui.Ui;
+
 /**
  * Deletes a numbered task from the task list.
  */

@@ -1,15 +1,23 @@
+package mona.command;
+
+import mona.MonaException;
+import mona.storage.Storage;
+import mona.task.Task;
+import mona.task.TaskList;
+import mona.ui.Ui;
+
 /**
- * Marks a numbered task as incomplete.
+ * Marks a numbered task as complete.
  */
-public class UnmarkCommand extends Command {
+public class MarkCommand extends Command {
     private final int taskNumber;
 
     /**
-     * Creates a command that marks the given one-based task number as incomplete.
+     * Creates a command that marks the given one-based task number as complete.
      *
-     * @param taskNumber the one-based number of the task to unmark.
+     * @param taskNumber the one-based number of the task to mark.
      */
-    public UnmarkCommand(int taskNumber) {
+    public MarkCommand(int taskNumber) {
         this.taskNumber = taskNumber;
     }
 
@@ -28,8 +36,8 @@ public class UnmarkCommand extends Command {
         }
 
         Task task = tasks.get(taskNumber - 1);
-        task.markAsNotDone();
+        task.markAsDone();
         storage.save(tasks.asList());
-        ui.showMessage("❌ The constellation fades. I've marked this task as not done yet:\n  " + task);
+        ui.showMessage("✅ The stars align. I've marked this task as done:\n  " + task);
     }
 }

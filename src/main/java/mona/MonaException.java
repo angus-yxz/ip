@@ -1,3 +1,5 @@
+package mona;
+
 /**
  * Represents an error that Mona recognizes while reading user input, such as a missing
  * description or an invalid task number. The message carried by this exception is shown

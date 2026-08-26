@@ -1,3 +1,11 @@
+package mona;
+
+import mona.command.Command;
+import mona.parser.Parser;
+import mona.storage.Storage;
+import mona.task.TaskList;
+import mona.ui.Ui;
+
 /**
  * Provides a command-line task manager named Mona.
  */
