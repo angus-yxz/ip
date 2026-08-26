@@ -1,4 +1,5 @@
 import java.time.format.DateTimeParseException;
+import java.util.Optional;
 
 /**
  * Parses and validates arguments from commands entered by the user.
@@ -12,6 +13,52 @@ public final class Parser {
     }
 
     /**
+     * Returns an executable command parsed from the given user input.
+     *
+     * @param userInput the trimmed line entered by the user.
+     * @return the parsed executable command.
+     * @throws MonaException if the command word or any of its arguments is invalid.
+     */
+    public static Command parse(String userInput) throws MonaException {
+        if (userInput.trim().isEmpty()) {
+            throw MonaException.withHint(
+                    "❌ Silence carries no fate. Please enter a command.",
+                    "list");
+        }
+
+        Optional<CommandWord> parsedCommandWord = CommandWord.from(userInput);
+        if (parsedCommandWord.isEmpty()) {
+            throw MonaException.withHint(
+                    "❌ That command is not written in the stars I can read. "
+                            + "Try a todo, deadline, or event.",
+                    "list | todo <description> | deadline <description> /by <yyyy-mm-dd> | "
+                            + "event <description> /from <yyyy-mm-dd> /to <yyyy-mm-dd> | "
+                            + "on <yyyy-mm-dd> | in <days> | mark <number> | "
+                            + "unmark <number> | delete <number> | bye");
+        }
+
+        CommandWord commandWord = parsedCommandWord.get();
+        return switch (commandWord) {
+            case BYE -> new ExitCommand();
+            case LIST -> new ListCommand();
+            case MARK -> new MarkCommand(parseTaskNumber(userInput, CommandWord.MARK));
+            case UNMARK -> new UnmarkCommand(parseTaskNumber(userInput, CommandWord.UNMARK));
+            case DELETE -> new DeleteCommand(parseTaskNumber(userInput, CommandWord.DELETE));
+            case TODO -> new TodoCommand(parseTodoDescription(userInput));
+            case DEADLINE -> {
+                DeadlineArguments arguments = parseDeadline(userInput);
+                yield new DeadlineCommand(arguments.description(), arguments.deadline());
+            }
+            case EVENT -> {
+                EventArguments arguments = parseEvent(userInput);
+                yield new EventCommand(arguments.description(), arguments.start(), arguments.end());
+            }
+            case ON -> new OnCommand(parseOnDate(userInput));
+            case IN -> new InCommand(parseDaysAhead(userInput));
+        };
+    }
+
+    /**
      * Returns the validated description from a todo command.
      *
      * @param userInput the trimmed line entered by the user.
@@ -19,7 +66,7 @@ public final class Parser {
      * @throws MonaException if no description is given.
      */
     public static String parseTodoDescription(String userInput) throws MonaException {
-        String description = Command.TODO.extractArguments(userInput);
+        String description = CommandWord.TODO.extractArguments(userInput);
         if (description.trim().isEmpty()) {
             throw MonaException.withHint(
                     "❌ A todo needs a name before its fate can be charted.",
@@ -37,7 +84,7 @@ public final class Parser {
      * @throws MonaException if the description, separator, or date is invalid.
      */
     public static DeadlineArguments parseDeadline(String userInput) throws MonaException {
-        String arguments = Command.DEADLINE.extractArguments(userInput);
+        String arguments = CommandWord.DEADLINE.extractArguments(userInput);
         int separatorIndex = arguments.indexOf(DEADLINE_SEPARATOR);
         if (separatorIndex < 0) {
             throw MonaException.withHint(
@@ -71,7 +118,7 @@ public final class Parser {
      * @throws MonaException if the description, separators, or dates are invalid.
      */
     public static EventArguments parseEvent(String userInput) throws MonaException {
-        String arguments = Command.EVENT.extractArguments(userInput);
+        String arguments = CommandWord.EVENT.extractArguments(userInput);
         int startSeparatorIndex = arguments.indexOf(EVENT_START_SEPARATOR);
         int endSeparatorIndex = arguments.indexOf(EVENT_END_SEPARATOR,
                 startSeparatorIndex + EVENT_START_SEPARATOR.length());
@@ -113,17 +160,17 @@ public final class Parser {
      * Returns the validated task number from a mark, unmark, or delete command.
      *
      * @param userInput the trimmed line entered by the user.
-     * @param command the command whose task number should be parsed.
+     * @param commandWord the command whose task number should be parsed.
      * @return the task number entered by the user.
      * @throws MonaException if no task number is given or it is not an integer.
      */
-    public static int parseTaskNumber(String userInput, Command command) throws MonaException {
-        String argument = command.extractArguments(userInput).trim();
+    public static int parseTaskNumber(String userInput, CommandWord commandWord) throws MonaException {
+        String argument = commandWord.extractArguments(userInput).trim();
         if (argument.isEmpty()) {
-            String message = command == Command.DELETE
+            String message = commandWord == CommandWord.DELETE
                     ? "❌ Tell me which task should be deleted."
                     : "❌ Tell me which task's fate to alter.";
-            throw MonaException.withHint(message, command + " 2");
+            throw MonaException.withHint(message, commandWord + " 2");
         }
 
         try {
@@ -132,7 +179,7 @@ public final class Parser {
             throw MonaException.withHint(
                     "❌ No such fate is written in the constellations. "
                             + "Please enter a valid task number.",
-                    command + " 2");
+                    commandWord + " 2");
         }
     }
 
@@ -144,7 +191,7 @@ public final class Parser {
      * @throws MonaException if no date is given or it cannot be parsed.
      */
     public static TaskDateTime parseOnDate(String userInput) throws MonaException {
-        String argument = Command.ON.extractArguments(userInput).trim();
+        String argument = CommandWord.ON.extractArguments(userInput).trim();
         if (argument.isEmpty()) {
             throw MonaException.withHint(
                     "❌ Tell me which date's fate to reveal.",
@@ -162,7 +209,7 @@ public final class Parser {
      * @throws MonaException if no number is given or it is not a non-negative integer.
      */
     public static int parseDaysAhead(String userInput) throws MonaException {
-        String argument = Command.IN.extractArguments(userInput).trim();
+        String argument = CommandWord.IN.extractArguments(userInput).trim();
         if (argument.isEmpty()) {
             throw MonaException.withHint(
                     "❌ Tell me how many days ahead the stars should look.",
