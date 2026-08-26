@@ -1,3 +1,5 @@
+package mona;
+
 /**
  * Adds an event to the task list.
  */

@@ -1,3 +1,5 @@
+package mona;
+
 /**
  * Provides a command-line task manager named Mona.
  */

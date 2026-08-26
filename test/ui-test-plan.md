@@ -1,6 +1,6 @@
 # UI test plan
 
-Run `javac --release 25 -d build/classes src/main/java/*.java` before this plan.
+Run `javac --release 25 -d build/classes src/main/java/mona/*.java` before this plan.
 Each test starts a new copy of the program.
 
 Mona now saves tasks to `./data/mona.txt` and reloads them on startup. Delete the
@@ -11,7 +11,7 @@ start from an empty list, as their expected output assumes.
 
 **Aim:** Verify that the program accepts the `bye` command and prints a farewell.
 
-**Run:** `java -cp build/classes Mona`
+**Run:** `java -cp build/classes mona.Mona`
 
 **Input:**
 ```text
@@ -40,7 +40,7 @@ ____________________________________________________________
 
 **Aim:** Verify that todos, deadlines, and events are added, marked, and listed with their type details.
 
-**Run:** `java -cp build/classes Mona`
+**Run:** `java -cp build/classes mona.Mona`
 
 **Input:**
 ```text
@@ -99,7 +99,7 @@ ____________________________________________________________
 
 **Aim:** Verify that a deadline date is stored and displayed as entered instead of being parsed.
 
-**Run:** `java -cp build/classes Mona`
+**Run:** `java -cp build/classes mona.Mona`
 
 **Input:**
 ```text
@@ -139,7 +139,7 @@ ____________________________________________________________
 
 **Aim:** Verify that invalid task numbers and missing task separators are rejected without adding tasks.
 
-**Run:** `java -cp build/classes Mona`
+**Run:** `java -cp build/classes mona.Mona`
 
 **Input:**
 ```text
@@ -193,7 +193,7 @@ ____________________________________________________________
 **Aim:** Verify that an unrecognized command and an empty todo description are both rejected
 with a specific error, and that no task is added in either case.
 
-**Run:** `java -cp build/classes Mona`
+**Run:** `java -cp build/classes mona.Mona`
 
 **Input:**
 ```text
@@ -237,7 +237,7 @@ ____________________________________________________________
 **Aim:** Verify that a deadline or event with a blank description (but a valid /by, /from,
 and /to) is rejected, and that a missing task number for mark/unmark is rejected too.
 
-**Run:** `java -cp build/classes Mona`
+**Run:** `java -cp build/classes mona.Mona`
 
 **Input:**
 ```text
@@ -286,7 +286,7 @@ ____________________________________________________________
 **Aim:** Verify that deleting a task removes the selected task, reports the new task count,
 and closes the numbering gap in the list.
 
-**Run:** `java -cp build/classes Mona`
+**Run:** `java -cp build/classes mona.Mona`
 
 **Input:**
 ```text
@@ -375,7 +375,7 @@ ____________________________________________________________
 **Aim:** Verify that delete reports the themed, actionable error for a missing number,
 a nonnumeric number, an empty list, and an out-of-range number without removing a task.
 
-**Run:** `java -cp build/classes Mona`
+**Run:** `java -cp build/classes mona.Mona`
 
 **Input:**
 ```text
@@ -443,7 +443,7 @@ program is started again, confirming the data file was saved and read back corre
 
 **Setup:** Delete the `data` directory so this test starts from an empty list.
 
-**Run (first launch):** `java -cp build/classes Mona`
+**Run (first launch):** `java -cp build/classes mona.Mona`
 
 **Input:**
 ```text
@@ -453,7 +453,7 @@ mark 1
 bye
 ```
 
-**Run (second launch, same `data` directory):** `java -cp build/classes Mona`
+**Run (second launch, same `data` directory):** `java -cp build/classes mona.Mona`
 
 **Input:**
 ```text

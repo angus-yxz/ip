@@ -1,3 +1,5 @@
+package mona;
+
 /**
  * Ends the current Mona session after showing a farewell message.
  */

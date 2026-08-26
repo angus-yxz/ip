@@ -1,15 +1,17 @@
+package mona;
+
 /**
- * Deletes a numbered task from the task list.
+ * Marks a numbered task as incomplete.
  */
-public class DeleteCommand extends Command {
+public class UnmarkCommand extends Command {
     private final int taskNumber;
 
     /**
-     * Creates a command that deletes the given one-based task number.
+     * Creates a command that marks the given one-based task number as incomplete.
      *
-     * @param taskNumber the one-based number of the task to delete.
+     * @param taskNumber the one-based number of the task to unmark.
      */
-    public DeleteCommand(int taskNumber) {
+    public UnmarkCommand(int taskNumber) {
         this.taskNumber = taskNumber;
     }
 
@@ -17,7 +19,7 @@ public class DeleteCommand extends Command {
     public void execute(TaskList tasks, Ui ui, Storage storage) throws MonaException {
         if (tasks.isEmpty()) {
             throw MonaException.withHint(
-                    "❌ The constellations remain still. There are no tasks to be deleted.",
+                    "❌ There are no tasks yet whose fate can be altered.",
                     "todo read book");
         }
 
@@ -27,9 +29,9 @@ public class DeleteCommand extends Command {
                     "list");
         }
 
-        Task deletedTask = tasks.delete(taskNumber - 1);
+        Task task = tasks.get(taskNumber - 1);
+        task.markAsNotDone();
         storage.save(tasks.asList());
-        ui.showMessage("✅ A fate fades from the constellations. I've removed this task:\n  " + deletedTask
-                + "\nNow you have " + tasks.size() + " tasks in the list.");
+        ui.showMessage("❌ The constellation fades. I've marked this task as not done yet:\n  " + task);
     }
 }
