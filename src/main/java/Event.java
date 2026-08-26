@@ -1,3 +1,5 @@
+import java.time.LocalDate;
+
 /**
  * Represents a task that occurs between a specified start and end date, optionally with times.
  */
@@ -16,6 +18,11 @@ public class Event extends Task {
         super(description);
         this.start = start;
         this.end = end;
+    }
+
+    @Override
+    public boolean occursOn(LocalDate date) {
+        return !date.isBefore(start.toLocalDate()) && !date.isAfter(end.toLocalDate());
     }
 
     @Override

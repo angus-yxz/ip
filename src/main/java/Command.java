@@ -11,7 +11,9 @@ public enum Command {
     DELETE("delete", true),
     TODO("todo", true),
     DEADLINE("deadline", true),
-    EVENT("event", true);
+    EVENT("event", true),
+    ON("on", true),
+    IN("in", true);
 
     private final String commandWord;
     private final boolean hasArguments;

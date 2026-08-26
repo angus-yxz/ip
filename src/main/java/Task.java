@@ -1,3 +1,5 @@
+import java.time.LocalDate;
+
 /**
  * Represents a task that can be marked as complete or incomplete.
  */
@@ -54,6 +56,18 @@ public class Task {
      */
     public String getDescription() {
         return description;
+    }
+
+    /**
+     * Returns whether this task falls on the given date. Plain tasks (and todos) have no
+     * associated date and so never match; {@link Deadline} and {@link Event} override this to
+     * compare against their own date(s).
+     *
+     * @param date the date to check against.
+     * @return {@code true} if this task occurs on the given date, {@code false} otherwise.
+     */
+    public boolean occursOn(LocalDate date) {
+        return false;
     }
 
     /**
