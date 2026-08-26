@@ -1,68 +1,53 @@
-import java.util.Optional;
+import java.time.LocalDate;
 
 /**
- * Represents a command that the Mona REPL can process.
+ * Represents an executable command entered by the user.
  */
-public enum Command {
-    BYE("bye", false),
-    LIST("list", false),
-    MARK("mark", true),
-    UNMARK("unmark", true),
-    DELETE("delete", true),
-    TODO("todo", true),
-    DEADLINE("deadline", true),
-    EVENT("event", true),
-    ON("on", true),
-    IN("in", true);
-
-    private final String commandWord;
-    private final boolean hasArguments;
-
-    Command(String commandWord, boolean hasArguments) {
-        this.commandWord = commandWord;
-        this.hasArguments = hasArguments;
-    }
+public abstract class Command {
+    /**
+     * Executes this command against the current task list.
+     *
+     * @param tasks the current task list.
+     * @param ui the user interface through which messages are shown.
+     * @param storage the storage used to persist task changes.
+     * @throws MonaException if the command cannot be completed.
+     */
+    public abstract void execute(TaskList tasks, Ui ui, Storage storage) throws MonaException;
 
     /**
-     * Returns the command represented by the given user input.
+     * Returns whether this command should end the application.
      *
-     * @param userInput the trimmed line entered by the user.
-     * @return the matching command, or an empty value if the input does not invoke a command.
+     * @return {@code true} if the application should exit, or {@code false} otherwise.
      */
-    public static Optional<Command> from(String userInput) {
-        for (Command command : values()) {
-            if (command.matches(userInput)) {
-                return Optional.of(command);
+    public boolean isExit() {
+        return false;
+    }
+
+    protected static void addTask(TaskList tasks, Task task, Storage storage, Ui ui)
+            throws MonaException {
+        tasks.add(task);
+        // Save before reporting success, so a failed save is reported as an error
+        // instead of falsely telling the user the task was added.
+        storage.save(tasks.asList());
+        ui.showMessage("✅ Your fate is rewritten. I've added this task:\n  " + task
+                + "\nNow you have " + tasks.size() + " tasks in the list.");
+    }
+
+    protected static void showMatchingTasks(TaskList tasks, LocalDate date, String header, Ui ui) {
+        StringBuilder taskList = new StringBuilder(header);
+        int matchCount = 0;
+        for (Task task : tasks) {
+            if (task.occursOn(date)) {
+                matchCount++;
+                taskList.append(System.lineSeparator())
+                        .append(matchCount)
+                        .append(".")
+                        .append(task);
             }
         }
-
-        return Optional.empty();
-    }
-
-    /**
-     * Returns the text following this command's word.
-     *
-     * @param userInput the trimmed line that invokes this command.
-     * @return the command's arguments, or an empty string if none were entered.
-     */
-    public String extractArguments(String userInput) {
-        return userInput.length() == commandWord.length()
-                ? ""
-                : userInput.substring(commandWord.length() + 1);
-    }
-
-    /**
-     * Returns the word a user enters to invoke this command.
-     *
-     * @return this command's user-facing word.
-     */
-    @Override
-    public String toString() {
-        return commandWord;
-    }
-
-    private boolean matches(String userInput) {
-        return userInput.equals(commandWord)
-                || hasArguments && userInput.startsWith(commandWord + " ");
+        if (matchCount == 0) {
+            taskList.append(System.lineSeparator()).append("  (No fates found on this date.)");
+        }
+        ui.showMessage(taskList.toString());
     }
 }
