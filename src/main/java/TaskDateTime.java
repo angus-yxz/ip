@@ -49,6 +49,16 @@ public final class TaskDateTime {
     }
 
     /**
+     * Returns the calendar date this represents, discarding any time of day. Used to check
+     * whether a deadline or event falls on a particular date, regardless of what time it is.
+     *
+     * @return this date, without a time component.
+     */
+    public LocalDate toLocalDate() {
+        return dateTime.toLocalDate();
+    }
+
+    /**
      * Returns this date's representation for the data file: {@code yyyy-MM-dd HHmm} if a
      * time was given, or plain {@code yyyy-MM-dd} otherwise. Both are read back directly by
      * {@link #parse(String)}.

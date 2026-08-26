@@ -1,5 +1,6 @@
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Optional;
@@ -67,7 +68,8 @@ public class Mona {
                             "❌ That command is not written in the stars I can read. "
                                     + "Try a todo, deadline, or event.",
                             "list | todo <description> | deadline <description> /by <yyyy-mm-dd> | "
-                                    + "event <description> /from <yyyy-mm-dd> /to <yyyy-mm-dd> | mark <number> | "
+                                    + "event <description> /from <yyyy-mm-dd> /to <yyyy-mm-dd> | "
+                                    + "on <yyyy-mm-dd> | in <days> | mark <number> | "
                                     + "unmark <number> | delete <number> | bye");
                 }
 
@@ -96,6 +98,12 @@ public class Mona {
                         break;
                     case EVENT:
                         addEvent(tasks, userInput, storage);
+                        break;
+                    case ON:
+                        printTasksOnDate(tasks, userInput);
+                        break;
+                    case IN:
+                        printTasksInDays(tasks, userInput);
                         break;
                     default:
                         throw new AssertionError("Unhandled command: " + command);
@@ -223,6 +231,86 @@ public class Mona {
                     .append(index + 1)
                     .append(".")
                     .append(tasks.get(index));
+        }
+        printFormatted(taskList.toString());
+    }
+
+    /**
+     * Prints the deadlines and events occurring on a user-specified date.
+     *
+     * @param tasks the current task list.
+     * @param userInput the trimmed line entered by the user, e.g. {@code on 2019-10-15}.
+     * @throws MonaException if no date is given, or the date cannot be parsed.
+     */
+    private static void printTasksOnDate(ArrayList<Task> tasks, String userInput) throws MonaException {
+        String argument = Command.ON.extractArguments(userInput).trim();
+        if (argument.isEmpty()) {
+            throw MonaException.withHint(
+                    "❌ Tell me which date's fate to reveal.",
+                    "on 2019-10-15");
+        }
+
+        TaskDateTime date = parseDate(argument, "on 2019-10-15");
+        LocalDate localDate = date.toLocalDate();
+        printMatchingTasks(tasks, localDate, "✨ On " + date + ", the stars reveal:");
+    }
+
+    /**
+     * Prints the deadlines and events occurring a given number of days from today.
+     *
+     * @param tasks the current task list.
+     * @param userInput the trimmed line entered by the user, e.g. {@code in 3}.
+     * @throws MonaException if no number of days is given, or it is not a non-negative integer.
+     */
+    private static void printTasksInDays(ArrayList<Task> tasks, String userInput) throws MonaException {
+        String argument = Command.IN.extractArguments(userInput).trim();
+        if (argument.isEmpty()) {
+            throw MonaException.withHint(
+                    "❌ Tell me how many days ahead the stars should look.",
+                    "in 3");
+        }
+
+        int daysAhead;
+        try {
+            daysAhead = Integer.parseInt(argument);
+        } catch (NumberFormatException exception) {
+            throw MonaException.withHint(
+                    "❌ The stars only count whole days. Please enter a valid number.",
+                    "in 3");
+        }
+        if (daysAhead < 0) {
+            throw MonaException.withHint(
+                    "❌ The stars cannot yet see a negative number of days.",
+                    "in 3");
+        }
+
+        LocalDate targetDate = LocalDate.now().plusDays(daysAhead);
+        printMatchingTasks(tasks, targetDate,
+                "✨ In " + daysAhead + " day(s), the stars reveal:");
+    }
+
+    /**
+     * Prints the tasks (usually deadlines and events) that occur on the given date, under the
+     * given header. Tasks with no associated date, such as todos, never match.
+     *
+     * @param tasks the current task list.
+     * @param date the date to match tasks against.
+     * @param header the line to print before the matching tasks.
+     */
+    private static void printMatchingTasks(ArrayList<Task> tasks, LocalDate date, String header) {
+        StringBuilder taskList = new StringBuilder(header);
+        int matchCount = 0;
+        for (Task task : tasks) {
+            if (task.occursOn(date)) {
+                matchCount++;
+                taskList.append(System.lineSeparator())
+                        .append(matchCount)
+                        .append(".")
+                        .append(task);
+            }
+        }
+        if (matchCount == 0) {
+            taskList.append(System.lineSeparator()).append("  (No fates found on this date.)");
         }
         printFormatted(taskList.toString());
     }

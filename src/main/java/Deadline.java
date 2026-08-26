@@ -1,3 +1,5 @@
+import java.time.LocalDate;
+
 /**
  * Represents a task that must be completed by a specified date, optionally with a time.
  */
@@ -13,6 +15,11 @@ public class Deadline extends Task {
     public Deadline(String description, TaskDateTime deadline) {
         super(description);
         this.deadline = deadline;
+    }
+
+    @Override
+    public boolean occursOn(LocalDate date) {
+        return deadline.toLocalDate().equals(date);
     }
 
     @Override
