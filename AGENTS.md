@@ -41,38 +41,12 @@ Ensure that Java 25 is used when running the application or build tasks. On macO
 
 ## Required Java coding standard
 
-Follow the basic and intermediate rules in the
-[SE-EDU Java coding standard](https://se-education.org/guides/conventions/java/intermediate.html).
-The advanced rules are optional. In particular:
-
-* Use lowercase package names. Use nouns in `PascalCase` for classes and enums,
-  `camelCase` for variables, verbs in `camelCase` for methods, and
-  `SCREAMING_SNAKE_CASE` for constants.
-* Write names and comments in English. Do not fully capitalize acronyms embedded in
-  names (e.g., use `exportHtmlSource`, not `exportHTMLSource`).
-* Name boolean variables and methods so they read as booleans, normally using prefixes
-  such as `is`, `has`, `can`, and `should`. Use plural names for collections.
-* Test methods may use the format
-  `featureUnderTest_testScenario_expectedBehavior`.
-* Indent using four spaces, never tabs. Aim for no more than 110 characters per line;
-  120 characters is the hard limit. Indent wrapped lines by eight additional spaces.
-* Use K&R/Egyptian braces. Put spaces around operators and after commas and Java
-  keywords. Separate logical sections with a blank line.
-* Use braces for every loop and conditional body, including one-line bodies. Put the
-  conditional and its body on separate lines. Mark intentional `switch` fall-through
-  with `// Fallthrough`.
-* Put every class in a package, keep import ordering consistent, and import classes
-  explicitly rather than using wildcard imports.
-* Attach array brackets to the type (e.g., `int[] values`). Initialize variables when
-  declaring them and give them the smallest practical scope.
-* Do not expose fields publicly, except constants or fields in a genuine behavior-free
-  data class.
-* Add descriptive Javadoc/header comments to every class and public method. Comments
-  may be omitted for getters/setters, test code, and overrides whose inherited Javadoc
-  applies exactly. Start Javadoc with a short summary sentence such as `Returns ...`,
-  `Adds ...`, or `Sends ...`, and use proper Javadoc structure and punctuation.
-* Use English with American spelling for comments and indent comments consistently
-  with the surrounding code.
+**Mandatory:** before writing or reviewing any Java code in this repository, load the
+`seedu-java-coding-standard` skill and follow it exactly. It is the complete,
+authoritative statement of the basic and intermediate rules from the
+[SE-EDU Java coding standard](https://se-education.org/guides/conventions/java/intermediate.html)
+(the advanced rules on that page remain optional). This applies to new code and to any
+existing code you touch.
 
 ## Testing
 
@@ -88,27 +62,13 @@ JUnit Platform.
 
 ## Git
 
-Use lightweight tags unless the user requests an annotated tag.
-When proposing or creating a commit message, include enough detail to explain the
-rationale for the change.
+**Mandatory:** before proposing or creating a commit message, branch name, or tag,
+load the `seedu-git-standard` skill and follow it exactly. It is the complete,
+authoritative statement of the
+[SE-EDU Git conventions](https://se-education.org/guides/conventions/git.html) plus
+this project's tag convention. This applies to all future commits.
+
 Do not commit or push unless explicitly asked.
-
-Follow the commit subject rules in the
-[SE-EDU Git conventions](https://se-education.org/guides/conventions/git.html):
-
-* Give every commit a meaningful subject.
-* Aim for no more than 50 characters; 72 characters is the hard limit.
-* Use imperative mood, capitalize the first letter, and do not end with a period.
-* An optional scope or category prefix is allowed (e.g.,
-  `Parser: Handle invalid dates`).
-
-Commit bodies are optional. If a body is used:
-
-* Separate it from the subject with a blank line, wrap it at 72 characters, and use
-  blank lines between paragraphs.
-* Explain what changed and why, rather than narrating how the code implements it.
-* Use present tense for the existing situation and imperative mood for the change.
-* Avoid repeating information already clear from comments or the diff.
 
 ## Individual project setup and workflow
 
