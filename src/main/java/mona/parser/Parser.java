@@ -10,6 +10,7 @@ import mona.command.DeadlineCommand;
 import mona.command.DeleteCommand;
 import mona.command.EventCommand;
 import mona.command.ExitCommand;
+import mona.command.FindCommand;
 import mona.command.InCommand;
 import mona.command.ListCommand;
 import mona.command.MarkCommand;
@@ -50,7 +51,7 @@ public final class Parser {
                             + "Try a todo, deadline, or event.",
                     "list | todo <description> | deadline <description> /by <yyyy-mm-dd> | "
                             + "event <description> /from <yyyy-mm-dd> /to <yyyy-mm-dd> | "
-                            + "on <yyyy-mm-dd> | in <days> | mark <number> | "
+                            + "find <keyword> | on <yyyy-mm-dd> | in <days> | mark <number> | "
                             + "unmark <number> | delete <number> | bye");
         }
 
@@ -58,6 +59,7 @@ public final class Parser {
         return switch (commandWord) {
             case BYE -> new ExitCommand();
             case LIST -> new ListCommand();
+            case FIND -> new FindCommand(parseFindKeyword(userInput));
             case MARK -> new MarkCommand(parseTaskNumber(userInput, CommandWord.MARK));
             case UNMARK -> new UnmarkCommand(parseTaskNumber(userInput, CommandWord.UNMARK));
             case DELETE -> new DeleteCommand(parseTaskNumber(userInput, CommandWord.DELETE));
@@ -91,6 +93,24 @@ public final class Parser {
         }
 
         return description;
+    }
+
+    /**
+     * Returns the validated keyword from a find command.
+     *
+     * @param userInput the trimmed line entered by the user.
+     * @return the keyword to find in task descriptions.
+     * @throws MonaException if no keyword is given.
+     */
+    public static String parseFindKeyword(String userInput) throws MonaException {
+        String keyword = CommandWord.FIND.extractArguments(userInput).trim();
+        if (keyword.isEmpty()) {
+            throw MonaException.withHint(
+                    "❌ The stars need a keyword to find matching tasks.",
+                    "find book");
+        }
+
+        return keyword;
     }
 
     /**

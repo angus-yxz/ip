@@ -3,6 +3,7 @@ package mona.task;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.Locale;
 
 /**
  * Manages Mona's collection of tasks.
@@ -73,6 +74,24 @@ public class TaskList implements Iterable<Task> {
      */
     public boolean isEmpty() {
         return tasks.isEmpty();
+    }
+
+    /**
+     * Returns tasks whose descriptions contain the given keyword, ignoring letter case.
+     *
+     * @param keyword the keyword to search for in task descriptions.
+     * @return matching tasks in their current list order.
+     */
+    public ArrayList<Task> find(String keyword) {
+        String normalizedKeyword = keyword.toLowerCase(Locale.ROOT);
+        ArrayList<Task> matchingTasks = new ArrayList<>();
+        for (Task task : tasks) {
+            if (task.getDescription().toLowerCase(Locale.ROOT).contains(normalizedKeyword)) {
+                matchingTasks.add(task);
+            }
+        }
+
+        return matchingTasks;
     }
 
     /**
