@@ -74,6 +74,18 @@ The advanced rules are optional. In particular:
 * Use English with American spelling for comments and indent comments consistently
   with the surrounding code.
 
+## Testing
+
+Tests live under `[project root]/src/test/java`, mirroring the package structure of the
+class under test, and run via Gradle's `test` task (`./gradlew test`), which uses the
+JUnit Platform.
+
+* Test coverage target: JUnit tests should cover the top ~50% highest-value methods
+  overall (prioritizing complex, core, or critical business logic) rather than every
+  getter/setter or thin delegation method.
+* After each code change, review whether the coverage target still holds and update or
+  add JUnit tests as needed so it continues to be met.
+
 ## Git
 
 Use lightweight tags unless the user requests an annotated tag.
