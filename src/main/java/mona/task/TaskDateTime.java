@@ -14,7 +14,8 @@ import java.time.format.DateTimeParseException;
  */
 public final class TaskDateTime {
     // Input formats accepted from the user and from the data file.
-    private static final DateTimeFormatter INPUT_DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm");
+    private static final DateTimeFormatter INPUT_DATE_TIME_FORMAT =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm");
     private static final DateTimeFormatter INPUT_DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     // Display format shown to the user, e.g. "Oct 15 2019, 6:00 pm".
