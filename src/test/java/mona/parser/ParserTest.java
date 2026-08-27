@@ -17,6 +17,7 @@ import mona.command.DeadlineCommand;
 import mona.command.DeleteCommand;
 import mona.command.EventCommand;
 import mona.command.ExitCommand;
+import mona.command.FindCommand;
 import mona.command.InCommand;
 import mona.command.ListCommand;
 import mona.command.MarkCommand;
@@ -45,6 +46,16 @@ public class ParserTest {
 
         assertInstanceOf(ListCommand.class, command);
         assertFalse(command.isExit());
+    }
+
+    @Test
+    public void parse_findCommand_returnsFindCommand() throws MonaException {
+        assertInstanceOf(FindCommand.class, Parser.parse("find book"));
+    }
+
+    @Test
+    public void parse_findWithoutKeyword_throwsMonaException() {
+        assertThrows(MonaException.class, () -> Parser.parse("find"));
     }
 
     @Test
@@ -117,6 +128,21 @@ public class ParserTest {
     @Test
     public void parseTodoDescription_blankDescription_throwsMonaException() {
         assertThrows(MonaException.class, () -> Parser.parseTodoDescription("todo   "));
+    }
+
+    @Test
+    public void parseFindKeyword_validKeyword_returnsKeyword() throws MonaException {
+        assertEquals("book", Parser.parseFindKeyword("find book"));
+    }
+
+    @Test
+    public void parseFindKeyword_missingKeyword_throwsMonaException() {
+        assertThrows(MonaException.class, () -> Parser.parseFindKeyword("find"));
+    }
+
+    @Test
+    public void parseFindKeyword_blankKeyword_throwsMonaException() {
+        assertThrows(MonaException.class, () -> Parser.parseFindKeyword("find   "));
     }
 
     @Test

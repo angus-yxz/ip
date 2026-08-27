@@ -178,4 +178,39 @@ public class TaskListTest {
 
         assertThrows(UnsupportedOperationException.class, iterator::remove);
     }
+
+    @Test
+    public void find_keywordWithDifferentCase_returnsDescriptionMatchesInOrder() {
+        TaskList tasks = new TaskList();
+        Todo firstMatch = new Todo("Read Book");
+        Deadline nonMatch = new Deadline("return notes", TaskDateTime.parse("2019-10-15"));
+        Deadline secondMatch = new Deadline("return book", TaskDateTime.parse("2019-10-16"));
+        tasks.add(firstMatch);
+        tasks.add(nonMatch);
+        tasks.add(secondMatch);
+
+        ArrayList<Task> matchingTasks = tasks.find("BOOK");
+
+        assertEquals(List.of(firstMatch, secondMatch), matchingTasks);
+    }
+
+    @Test
+    public void find_textOnlyInFormattedDetails_returnsNoMatches() {
+        TaskList tasks = new TaskList();
+        tasks.add(new Deadline("return notes", TaskDateTime.parse("2019-10-15")));
+
+        ArrayList<Task> matchingTasks = tasks.find("2019");
+
+        assertTrue(matchingTasks.isEmpty());
+    }
+
+    @Test
+    public void find_keywordWithoutMatches_returnsEmptyList() {
+        TaskList tasks = new TaskList();
+        tasks.add(new Todo("read book"));
+
+        ArrayList<Task> matchingTasks = tasks.find("movie");
+
+        assertTrue(matchingTasks.isEmpty());
+    }
 }

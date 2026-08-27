@@ -32,6 +32,11 @@ public class CommandWordTest {
     }
 
     @Test
+    public void from_findWithKeyword_returnsFindCommand() {
+        assertEquals(Optional.of(CommandWord.FIND), CommandWord.from("find book"));
+    }
+
+    @Test
     public void from_bareTodoWord_returnsTodoCommand() {
         assertEquals(Optional.of(CommandWord.TODO), CommandWord.from("todo"));
     }
