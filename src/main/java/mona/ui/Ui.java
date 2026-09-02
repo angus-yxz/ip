@@ -16,15 +16,15 @@ public class Ui {
             + "|_|  |_|\\___/|_| \\_/_/   \\_\\\n";
 
     private final Scanner scanner;
+    private final PrintStream output;
 
     /**
      * Creates a UI that reads from standard input and writes UTF-8 text to standard output.
      */
     public Ui() {
         // The default console encoding on Windows cannot represent the emoji used in Mona's
-        // messages, so stdout is switched to UTF-8 explicitly rather than relying on the
-        // platform default.
-        System.setOut(new PrintStream(System.out, true, StandardCharsets.UTF_8));
+        // messages, so write through a UTF-8 stream rather than relying on the platform default.
+        output = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         scanner = new Scanner(System.in);
     }
 
@@ -43,7 +43,7 @@ public class Ui {
      * @return the trimmed user input.
      */
     public String readCommand() {
-        System.out.print("Mona > ");
+        output.print("Mona > ");
         return scanner.nextLine().trim();
     }
 
@@ -53,8 +53,8 @@ public class Ui {
      * @param text the message to show.
      */
     public void showMessage(String text) {
-        System.out.println(SEPARATOR);
-        System.out.println(text);
-        System.out.println(SEPARATOR);
+        output.println(SEPARATOR);
+        output.println(text);
+        output.println(SEPARATOR);
     }
 }
