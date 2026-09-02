@@ -169,20 +169,20 @@ public class ParserTest {
 
     @Test
     public void parseDeadline_emptyDescription_throwsMonaException() {
-        assertThrows(MonaException.class,
-                () -> Parser.parseDeadline("deadline /by 2019-10-15"));
+        assertThrows(MonaException.class, () ->
+                Parser.parseDeadline("deadline /by 2019-10-15"));
     }
 
     @Test
     public void parseDeadline_emptyDate_throwsMonaException() {
-        assertThrows(MonaException.class,
-                () -> Parser.parseDeadline("deadline return book /by "));
+        assertThrows(MonaException.class, () ->
+                Parser.parseDeadline("deadline return book /by "));
     }
 
     @Test
     public void parseDeadline_invalidDate_throwsMonaException() {
-        assertThrows(MonaException.class,
-                () -> Parser.parseDeadline("deadline return book /by not-a-date"));
+        assertThrows(MonaException.class, () ->
+                Parser.parseDeadline("deadline return book /by not-a-date"));
     }
 
     @Test
@@ -202,33 +202,33 @@ public class ParserTest {
 
     @Test
     public void parseEvent_separatorsInWrongOrder_throwsMonaException() {
-        assertThrows(MonaException.class,
-                () -> Parser.parseEvent(
+        assertThrows(MonaException.class, () ->
+                Parser.parseEvent(
                         "event meeting /to 2019-10-16 /from 2019-10-15"));
     }
 
     @Test
     public void parseEvent_emptyDescription_throwsMonaException() {
-        assertThrows(MonaException.class,
-                () -> Parser.parseEvent("event /from 2019-10-15 /to 2019-10-16"));
+        assertThrows(MonaException.class, () ->
+                Parser.parseEvent("event /from 2019-10-15 /to 2019-10-16"));
     }
 
     @Test
     public void parseEvent_emptyStartDate_throwsMonaException() {
-        assertThrows(MonaException.class,
-                () -> Parser.parseEvent("event meeting /from  /to 2019-10-16"));
+        assertThrows(MonaException.class, () ->
+                Parser.parseEvent("event meeting /from  /to 2019-10-16"));
     }
 
     @Test
     public void parseEvent_emptyEndDate_throwsMonaException() {
-        assertThrows(MonaException.class,
-                () -> Parser.parseEvent("event meeting /from 2019-10-15 /to  "));
+        assertThrows(MonaException.class, () ->
+                Parser.parseEvent("event meeting /from 2019-10-15 /to  "));
     }
 
     @Test
     public void parseEvent_invalidStartDate_throwsMonaException() {
-        assertThrows(MonaException.class,
-                () -> Parser.parseEvent("event meeting /from bad-date /to 2019-10-16"));
+        assertThrows(MonaException.class, () ->
+                Parser.parseEvent("event meeting /from bad-date /to 2019-10-16"));
     }
 
     @Test
@@ -238,20 +238,20 @@ public class ParserTest {
 
     @Test
     public void parseTaskNumber_missingNumber_throwsMonaException() {
-        assertThrows(MonaException.class,
-                () -> Parser.parseTaskNumber("mark", CommandWord.MARK));
+        assertThrows(MonaException.class, () ->
+                Parser.parseTaskNumber("mark", CommandWord.MARK));
     }
 
     @Test
     public void parseTaskNumber_nonNumericNumber_throwsMonaException() {
-        assertThrows(MonaException.class,
-                () -> Parser.parseTaskNumber("mark abc", CommandWord.MARK));
+        assertThrows(MonaException.class, () ->
+                Parser.parseTaskNumber("mark abc", CommandWord.MARK));
     }
 
     @Test
     public void parseTaskNumber_deleteWithoutNumber_throwsMonaException() {
-        assertThrows(MonaException.class,
-                () -> Parser.parseTaskNumber("delete", CommandWord.DELETE));
+        assertThrows(MonaException.class, () ->
+                Parser.parseTaskNumber("delete", CommandWord.DELETE));
     }
 
     @Test
