@@ -53,8 +53,12 @@ public class Ui {
      * @param text the message to show.
      */
     public void showMessage(String text) {
-        output.println(SEPARATOR);
-        output.println(text);
-        output.println(SEPARATOR);
+        printLines(SEPARATOR, text, SEPARATOR);
+    }
+
+    private void printLines(String... lines) {
+        for (String line : lines) {
+            output.println(line);
+        }
     }
 }
