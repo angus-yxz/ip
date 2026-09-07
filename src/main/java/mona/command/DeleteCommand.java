@@ -23,19 +23,9 @@ public class DeleteCommand extends Command {
 
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) throws MonaException {
-        if (tasks.isEmpty()) {
-            throw MonaException.withHint(
-                    "❌ The constellations remain still. There are no tasks to be deleted.",
-                    "todo read book");
-        }
-
-        if (taskNumber < 1 || taskNumber > tasks.size()) {
-            throw MonaException.withHint(
-                    "❌ No such fate is written in the constellations. Please enter a valid task number.",
-                    "list");
-        }
-
-        Task deletedTask = tasks.delete(taskNumber - 1);
+        int taskIndex = toTaskIndex(tasks, taskNumber,
+                "❌ The constellations remain still. There are no tasks to be deleted.");
+        Task deletedTask = tasks.delete(taskIndex);
         storage.save(tasks.asList());
         ui.showMessage("✅ A fate fades from the constellations. I've removed this task:\n  " + deletedTask
                 + "\nNow you have " + tasks.size() + " tasks in the list.");

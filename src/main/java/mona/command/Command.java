@@ -41,6 +41,30 @@ public abstract class Command {
                 + "\nNow you have " + tasks.size() + " tasks in the list.");
     }
 
+    /**
+     * Returns the zero-based list index for a valid user-facing task number.
+     *
+     * @param tasks the task list against which the number is validated.
+     * @param taskNumber the one-based task number entered by the user.
+     * @param emptyTaskListMessage the command-specific message shown when there are no tasks.
+     * @return the corresponding zero-based list index.
+     * @throws MonaException if the task list is empty or the number is outside the list.
+     */
+    protected static int toTaskIndex(TaskList tasks, int taskNumber, String emptyTaskListMessage)
+            throws MonaException {
+        if (tasks.isEmpty()) {
+            throw MonaException.withHint(emptyTaskListMessage, "todo read book");
+        }
+
+        if (taskNumber < 1 || taskNumber > tasks.size()) {
+            throw MonaException.withHint(
+                    "❌ No such fate is written in the constellations. Please enter a valid task number.",
+                    "list");
+        }
+
+        return taskNumber - 1;
+    }
+
     protected static void showMatchingTasks(TaskList tasks, LocalDate date, String header, Ui ui) {
         StringBuilder taskList = new StringBuilder(header);
         int matchCount = 0;
