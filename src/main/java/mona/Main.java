@@ -25,7 +25,9 @@ public class Main extends Application {
         stage.setTitle("Mona");
         stage.setMinHeight(220);
         stage.setMinWidth(417);
-        fxmlLoader.<MainWindow>getController().setMona(mona);
+        MainWindow mainWindow = fxmlLoader.getController();
+        assert mainWindow != null : "MainWindow.fxml must define a MainWindow controller";
+        mainWindow.setMona(mona);
         stage.show();
     }
 }

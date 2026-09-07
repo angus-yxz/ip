@@ -78,13 +78,16 @@ public class Mona {
      * @return Mona's response, including any validation or storage error.
      */
     public String getResponse(String input) {
+        recordingUi.clearLastMessage();
         try {
             Command command = Parser.parse(input);
             command.execute(tasks, recordingUi, storage);
         } catch (MonaException exception) {
             recordingUi.showMessage(exception.getMessage());
         }
-        return recordingUi.getLastMessage();
+        String response = recordingUi.getLastMessage();
+        assert response != null : "Every command path must produce a UI response";
+        return response;
     }
 
     /**
@@ -100,6 +103,10 @@ public class Mona {
 
         public String getLastMessage() {
             return lastMessage;
+        }
+
+        private void clearLastMessage() {
+            lastMessage = null;
         }
     }
 }
