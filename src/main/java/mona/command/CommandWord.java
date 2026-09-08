@@ -49,6 +49,7 @@ public enum CommandWord {
      * @return the command's arguments, or an empty string if none were entered.
      */
     public String extractArguments(String userInput) {
+        assert matches(userInput) : "Input must invoke this command before extracting arguments";
         return userInput.length() == commandWord.length()
                 ? ""
                 : userInput.substring(commandWord.length() + 1);

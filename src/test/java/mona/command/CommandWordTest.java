@@ -1,6 +1,7 @@
 package mona.command;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Optional;
@@ -64,5 +65,11 @@ public class CommandWordTest {
     @Test
     public void extractArguments_bareTodoWord_returnsEmptyString() {
         assertEquals("", CommandWord.TODO.extractArguments("todo"));
+    }
+
+    @Test
+    public void extractArguments_inputForDifferentCommand_throwsAssertionError() {
+        assertThrows(AssertionError.class, () ->
+                CommandWord.TODO.extractArguments("find book"));
     }
 }
