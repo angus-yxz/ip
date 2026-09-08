@@ -213,4 +213,38 @@ public class TaskListTest {
 
         assertTrue(matchingTasks.isEmpty());
     }
+
+    @Test
+    public void sortChronologically_mixedTasks_ordersDatedTasksThenUndatedTasks() {
+        TaskList tasks = new TaskList();
+        Todo todo = new Todo("read book");
+        Deadline laterDeadline = new Deadline("submit report",
+                TaskDateTime.parse("2019-10-16 1800"));
+        Event earlierEvent = new Event("meeting", TaskDateTime.parse("2019-10-15 0900"),
+                TaskDateTime.parse("2019-10-15 1000"));
+        Deadline earlierDeadline = new Deadline("return book",
+                TaskDateTime.parse("2019-10-15 0800"));
+        tasks.add(todo);
+        tasks.add(laterDeadline);
+        tasks.add(earlierEvent);
+        tasks.add(earlierDeadline);
+
+        tasks.sortChronologically();
+
+        assertEquals(List.of(earlierDeadline, earlierEvent, laterDeadline, todo), tasks.asList());
+    }
+
+    @Test
+    public void sortChronologically_sameDateTime_retainsCurrentOrder() {
+        TaskList tasks = new TaskList();
+        Deadline first = new Deadline("first", TaskDateTime.parse("2019-10-15"));
+        Event second = new Event("second", TaskDateTime.parse("2019-10-15"),
+                TaskDateTime.parse("2019-10-16"));
+        tasks.add(first);
+        tasks.add(second);
+
+        tasks.sortChronologically();
+
+        assertEquals(List.of(first, second), tasks.asList());
+    }
 }

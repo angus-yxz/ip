@@ -15,6 +15,7 @@ import mona.command.InCommand;
 import mona.command.ListCommand;
 import mona.command.MarkCommand;
 import mona.command.OnCommand;
+import mona.command.SortCommand;
 import mona.command.TodoCommand;
 import mona.command.UnmarkCommand;
 import mona.task.TaskDateTime;
@@ -51,7 +52,7 @@ public final class Parser {
                             + "Try a todo, deadline, or event.",
                     "list | todo <description> | deadline <description> /by <yyyy-mm-dd> | "
                             + "event <description> /from <yyyy-mm-dd> /to <yyyy-mm-dd> | "
-                            + "find <keyword> | on <yyyy-mm-dd> | in <days> | mark <number> | "
+                            + "find <keyword> | sort | on <yyyy-mm-dd> | in <days> | mark <number> | "
                             + "unmark <number> | delete <number> | bye");
         }
 
@@ -59,6 +60,7 @@ public final class Parser {
         return switch (commandWord) {
             case BYE -> new ExitCommand();
             case LIST -> new ListCommand();
+            case SORT -> new SortCommand();
             case FIND -> new FindCommand(parseFindKeyword(userInput));
             case MARK -> new MarkCommand(parseTaskNumber(userInput, CommandWord.MARK));
             case UNMARK -> new UnmarkCommand(parseTaskNumber(userInput, CommandWord.UNMARK));

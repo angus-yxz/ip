@@ -28,6 +28,11 @@ public class Event extends Task {
     }
 
     @Override
+    TaskDateTime getChronologicalDateTime() {
+        return start;
+    }
+
+    @Override
     protected String getTypeCode() {
         return "E";
     }
