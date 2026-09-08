@@ -45,4 +45,51 @@ public class MonaTest {
         assertEquals("✨ Here is what the stars reveal:"
                 + System.lineSeparator() + "1.[T][ ] read book", response);
     }
+
+    @Test
+    public void getResponse_markAndUnmarkCommands_updateTaskStatus() {
+        Mona mona = new Mona(temporaryDirectory.resolve("mona.txt").toString());
+        mona.getResponse("todo read book");
+
+        String markedResponse = mona.getResponse("mark 1");
+        String unmarkedResponse = mona.getResponse("unmark 1");
+
+        assertTrue(markedResponse.contains("[T][X] read book"));
+        assertTrue(unmarkedResponse.contains("[T][ ] read book"));
+    }
+
+    @Test
+    public void getResponse_deleteCommand_removesSelectedTask() {
+        Mona mona = new Mona(temporaryDirectory.resolve("mona.txt").toString());
+        mona.getResponse("todo read book");
+        mona.getResponse("todo watch movie");
+
+        String deleteResponse = mona.getResponse("delete 1");
+        String listResponse = mona.getResponse("list");
+
+        assertTrue(deleteResponse.contains("[T][ ] read book"));
+        assertEquals("✨ Here is what the stars reveal:"
+                + System.lineSeparator() + "1.[T][ ] watch movie", listResponse);
+    }
+
+    @Test
+    public void getResponse_taskNumberOutOfRange_returnsValidationError() {
+        Mona mona = new Mona(temporaryDirectory.resolve("mona.txt").toString());
+        mona.getResponse("todo read book");
+
+        String response = mona.getResponse("mark 2");
+
+        assertEquals("❌ No such fate is written in the constellations. Please enter a valid task number."
+                + "\nHint: list", response);
+    }
+
+    @Test
+    public void getResponse_deleteWithEmptyList_returnsDeleteSpecificError() {
+        Mona mona = new Mona(temporaryDirectory.resolve("mona.txt").toString());
+
+        String response = mona.getResponse("delete 1");
+
+        assertEquals("❌ The constellations remain still. There are no tasks to be deleted."
+                + "\nHint: todo read book", response);
+    }
 }
