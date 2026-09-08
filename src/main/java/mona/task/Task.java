@@ -73,6 +73,16 @@ public class Task {
     }
 
     /**
+     * Returns the date and time used to place this task in chronological order.
+     * Undated tasks return {@code null} so they sort after dated tasks.
+     *
+     * @return this task's chronological date and time, or {@code null} if it has none.
+     */
+    TaskDateTime getChronologicalDateTime() {
+        return null;
+    }
+
+    /**
      * Returns the single-letter code identifying this task's type in the save file.
      * Subclasses with their own type (e.g. {@link Deadline}, {@link Event}) override this.
      *

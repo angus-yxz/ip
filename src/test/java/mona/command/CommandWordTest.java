@@ -24,7 +24,12 @@ public class CommandWordTest {
 
     @Test
     public void from_listWithTrailingText_returnsEmpty() {
-        assertTrue(CommandWord.from("list 3").isEmpty());
+        assertTrue(CommandWord.from("list /sort").isEmpty());
+    }
+
+    @Test
+    public void from_sortWord_returnsSortCommand() {
+        assertEquals(Optional.of(CommandWord.SORT), CommandWord.from("sort"));
     }
 
     @Test

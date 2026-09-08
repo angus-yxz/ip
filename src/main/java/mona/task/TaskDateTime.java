@@ -12,7 +12,7 @@ import java.time.format.DateTimeParseException;
  * A date entered without a time is stored internally as midnight but remembers that no
  * time was given, so it prints and saves without one.
  */
-public final class TaskDateTime {
+public final class TaskDateTime implements Comparable<TaskDateTime> {
     // Input formats accepted from the user and from the data file.
     private static final DateTimeFormatter INPUT_DATE_TIME_FORMAT =
             DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm");
@@ -59,6 +59,11 @@ public final class TaskDateTime {
      */
     public LocalDate toLocalDate() {
         return dateTime.toLocalDate();
+    }
+
+    @Override
+    public int compareTo(TaskDateTime other) {
+        return dateTime.compareTo(other.dateTime);
     }
 
     /**

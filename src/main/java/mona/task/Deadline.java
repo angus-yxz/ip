@@ -25,6 +25,11 @@ public class Deadline extends Task {
     }
 
     @Override
+    TaskDateTime getChronologicalDateTime() {
+        return deadline;
+    }
+
+    @Override
     protected String getTypeCode() {
         return "D";
     }

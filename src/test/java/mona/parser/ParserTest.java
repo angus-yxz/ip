@@ -22,6 +22,7 @@ import mona.command.InCommand;
 import mona.command.ListCommand;
 import mona.command.MarkCommand;
 import mona.command.OnCommand;
+import mona.command.SortCommand;
 import mona.command.TodoCommand;
 import mona.command.UnmarkCommand;
 import mona.parser.Parser.DeadlineArguments;
@@ -46,6 +47,11 @@ public class ParserTest {
 
         assertInstanceOf(ListCommand.class, command);
         assertFalse(command.isExit());
+    }
+
+    @Test
+    public void parse_sortCommand_returnsSortCommand() throws MonaException {
+        assertInstanceOf(SortCommand.class, Parser.parse("sort"));
     }
 
     @Test

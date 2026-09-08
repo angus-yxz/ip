@@ -47,6 +47,24 @@ public class MonaTest {
     }
 
     @Test
+    public void getResponse_sortThenList_listsTasksChronologically() {
+        Mona mona = new Mona(temporaryDirectory.resolve("mona.txt").toString());
+        mona.getResponse("todo read book");
+        mona.getResponse("deadline submit report /by 2019-10-16 1800");
+        mona.getResponse("deadline return book /by 2019-10-15");
+
+        String sortResponse = mona.getResponse("sort");
+        String listResponse = mona.getResponse("list");
+
+        assertEquals("✅ The constellations align. Your tasks are now in chronological order.",
+                sortResponse);
+        assertEquals("✨ Here is what the stars reveal:"
+                + System.lineSeparator() + "1.[D][ ] return book (by: Oct 15 2019)"
+                + System.lineSeparator() + "2.[D][ ] submit report (by: Oct 16 2019, 6:00 pm)"
+                + System.lineSeparator() + "3.[T][ ] read book", listResponse);
+    }
+
+    @Test
     public void getResponse_markAndUnmarkCommands_updateTaskStatus() {
         Mona mona = new Mona(temporaryDirectory.resolve("mona.txt").toString());
         mona.getResponse("todo read book");

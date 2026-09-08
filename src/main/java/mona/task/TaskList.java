@@ -2,6 +2,7 @@ package mona.task;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -88,6 +89,16 @@ public class TaskList implements Iterable<Task> {
         return tasks.stream()
                 .filter(task -> task.getDescription().toLowerCase(Locale.ROOT).contains(normalizedKeyword))
                 .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    /**
+     * Sorts dated tasks chronologically, placing undated tasks after them. Tasks with the
+     * same date and time retain their current relative order.
+     */
+    public void sortChronologically() {
+        Comparator<TaskDateTime> dateTimeComparator = Comparator.nullsLast(
+                Comparator.naturalOrder());
+        tasks.sort(Comparator.comparing(Task::getChronologicalDateTime, dateTimeComparator));
     }
 
     /**
