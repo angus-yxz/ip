@@ -28,6 +28,8 @@ short commands. It's named after the Genshin Impact character _Mona_.
 > * Dates are entered as `yyyy-mm-dd`, optionally followed by a 24-hour time, e.g.
 >   `2019-10-15` or `2019-10-15 1800`.
 > * Extra whitespace around parameters is ignored.
+> * Mona's replies are colour-coded: blue for general information, green for a
+>   successful change, and red for an error.
 
 #### Adding a todo: `todo`
 
