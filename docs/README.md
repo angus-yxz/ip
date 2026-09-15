@@ -122,6 +122,23 @@ Says farewell and closes Mona.
 
 Format: `bye`
 
+### Command summary
+
+| Action | Format | Example |
+|---|---|---|
+| Todo | `todo DESCRIPTION` | `todo read book` |
+| Deadline | `deadline DESCRIPTION /by DATE` | `deadline return book /by 2019-10-15` |
+| Event | `event DESCRIPTION /from START_DATE /to END_DATE` | `event project meeting /from 2019-10-15 /to 2019-10-16` |
+| List | `list` | `list` |
+| Find | `find KEYWORD` | `find book` |
+| On | `on DATE` | `on 2019-10-15` |
+| In | `in DAYS` | `in 3` |
+| Sort | `sort` | `sort` |
+| Mark | `mark INDEX` | `mark 2` |
+| Unmark | `unmark INDEX` | `unmark 2` |
+| Delete | `delete INDEX` | `delete 3` |
+| Exit | `bye` | `bye` |
+
 ### Saving your data
 
 Mona automatically saves your tasks to disk after every command that changes them.
