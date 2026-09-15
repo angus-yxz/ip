@@ -1,6 +1,7 @@
 package mona.storage;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.charset.StandardCharsets;
@@ -102,12 +103,42 @@ public class StorageTest {
                 "T | 0 | ",
                 "T | 0 | too | many fields",
                 "E | 0 | backwards | 2019-10-16 | 2019-10-15",
-                "D | 0 | invalid date | 2019-02-30"), StandardCharsets.UTF_8);
+                "D | 0 | invalid date | 2019-02-30",
+                "X | 0 | unknown task type"), StandardCharsets.UTF_8);
         Storage storage = new Storage(filePath.toString());
 
         ArrayList<Task> loadedTasks = storage.load();
 
         assertEquals(List.of("T | 0 | valid task"), toSaveFormats(loadedTasks));
+    }
+
+    @Test
+    public void load_fileContainsBlankLine_skipsBlankLine() throws Exception {
+        Path filePath = tempDir.resolve("mona.txt");
+        Files.write(filePath, List.of("T | 0 | read book", "", "T | 0 | watch movie"), StandardCharsets.UTF_8);
+        Storage storage = new Storage(filePath.toString());
+
+        ArrayList<Task> loadedTasks = storage.load();
+
+        assertEquals(List.of("T | 0 | read book", "T | 0 | watch movie"), toSaveFormats(loadedTasks));
+    }
+
+    @Test
+    public void load_dataPathIsDirectory_throwsMonaException() throws Exception {
+        Path directoryPath = tempDir.resolve("mona.txt");
+        Files.createDirectory(directoryPath);
+        Storage storage = new Storage(directoryPath.toString());
+
+        assertThrows(MonaException.class, storage::load);
+    }
+
+    @Test
+    public void save_dataPathIsDirectory_throwsMonaException() throws Exception {
+        Path directoryPath = tempDir.resolve("mona.txt");
+        Files.createDirectory(directoryPath);
+        Storage storage = new Storage(directoryPath.toString());
+
+        assertThrows(MonaException.class, () -> storage.save(new ArrayList<>()));
     }
 
     private static List<String> toSaveFormats(List<Task> tasks) {
