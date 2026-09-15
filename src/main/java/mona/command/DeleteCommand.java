@@ -1,6 +1,7 @@
 package mona.command;
 
 import mona.MonaException;
+import mona.ResponseType;
 import mona.storage.Storage;
 import mona.task.Task;
 import mona.task.TaskList;
@@ -29,5 +30,10 @@ public class DeleteCommand extends Command {
         storage.save(tasks.asList());
         ui.showMessage("✅ A fate fades from the constellations. I've removed this task:\n  " + deletedTask
                 + "\nNow you have " + tasks.size() + " tasks in the list.");
+    }
+
+    @Override
+    public ResponseType getResponseType() {
+        return ResponseType.SUCCESS;
     }
 }

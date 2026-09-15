@@ -1,6 +1,7 @@
 package mona.command;
 
 import mona.MonaException;
+import mona.ResponseType;
 import mona.storage.Storage;
 import mona.task.Deadline;
 import mona.task.TaskDateTime;
@@ -28,5 +29,10 @@ public class DeadlineCommand extends Command {
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) throws MonaException {
         addTask(tasks, new Deadline(description, deadline), storage, ui);
+    }
+
+    @Override
+    public ResponseType getResponseType() {
+        return ResponseType.SUCCESS;
     }
 }

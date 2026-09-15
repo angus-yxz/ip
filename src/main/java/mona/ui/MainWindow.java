@@ -10,6 +10,7 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import mona.Mona;
+import mona.MonaResponse;
 
 /**
  * Controls Mona's main JavaFX window.
@@ -46,7 +47,7 @@ public class MainWindow extends AnchorPane {
     @FXML
     private void handleUserInput() {
         String input = userInput.getText().trim();
-        String response = mona.getResponse(input);
+        MonaResponse response = mona.getResponse(input);
         dialogContainer.getChildren().addAll(
                 DialogBox.getUserDialog(input, userImage),
                 DialogBox.getMonaDialog(response, monaImage));

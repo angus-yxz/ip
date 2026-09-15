@@ -1,6 +1,7 @@
 package mona.command;
 
 import mona.MonaException;
+import mona.ResponseType;
 import mona.storage.Storage;
 import mona.task.Task;
 import mona.task.TaskList;
@@ -29,5 +30,10 @@ public class MarkCommand extends Command {
         task.markAsDone();
         storage.save(tasks.asList());
         ui.showMessage("✅ The stars align. I've marked this task as done:\n  " + task);
+    }
+
+    @Override
+    public ResponseType getResponseType() {
+        return ResponseType.SUCCESS;
     }
 }

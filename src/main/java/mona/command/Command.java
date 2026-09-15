@@ -3,6 +3,7 @@ package mona.command;
 import java.time.LocalDate;
 
 import mona.MonaException;
+import mona.ResponseType;
 import mona.storage.Storage;
 import mona.task.Task;
 import mona.task.TaskList;
@@ -29,6 +30,15 @@ public abstract class Command {
      */
     public boolean isExit() {
         return false;
+    }
+
+    /**
+     * Returns the visual category for a successful response from this command.
+     *
+     * @return the response type used by the GUI.
+     */
+    public ResponseType getResponseType() {
+        return ResponseType.INFO;
     }
 
     protected static void addTask(TaskList tasks, Task task, Storage storage, Ui ui)

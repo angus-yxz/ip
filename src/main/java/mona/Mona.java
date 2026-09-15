@@ -75,19 +75,22 @@ public class Mona {
      * Executes a user command and returns Mona's response for display by a GUI.
      *
      * @param input the command entered by the user.
-     * @return Mona's response, including any validation or storage error.
+     * @return Mona's response text and its visual category.
      */
-    public String getResponse(String input) {
+    public MonaResponse getResponse(String input) {
         recordingUi.clearLastMessage();
+        ResponseType responseType;
         try {
             Command command = Parser.parse(input);
             command.execute(tasks, recordingUi, storage);
+            responseType = command.getResponseType();
         } catch (MonaException exception) {
             recordingUi.showMessage(exception.getMessage());
+            responseType = ResponseType.ERROR;
         }
         String response = recordingUi.getLastMessage();
         assert response != null : "Every command path must produce a UI response";
-        return response;
+        return new MonaResponse(response, responseType);
     }
 
     /**
