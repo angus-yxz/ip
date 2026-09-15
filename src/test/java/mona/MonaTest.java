@@ -136,6 +136,24 @@ public class MonaTest {
     }
 
     @Test
+    public void getResponse_byeCommand_returnsExitTrue() {
+        Mona mona = new Mona(temporaryDirectory.resolve("mona.txt").toString());
+
+        MonaResponse response = mona.getResponse("bye");
+
+        assertTrue(response.isExit());
+    }
+
+    @Test
+    public void getResponse_nonExitCommand_returnsExitFalse() {
+        Mona mona = new Mona(temporaryDirectory.resolve("mona.txt").toString());
+
+        MonaResponse response = mona.getResponse("todo read book");
+
+        assertFalse(response.isExit());
+    }
+
+    @Test
     public void getResponse_deleteWithEmptyList_returnsDeleteSpecificError() {
         Mona mona = new Mona(temporaryDirectory.resolve("mona.txt").toString());
 

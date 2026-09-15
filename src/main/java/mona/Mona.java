@@ -80,29 +80,31 @@ public class Mona {
     public MonaResponse getWelcomeResponse(boolean includeBanner) {
         recordingUi.clearLastMessage();
         recordingUi.showWelcome(includeBanner);
-        return new MonaResponse(recordingUi.getLastMessage(), ResponseType.INFO);
+        return new MonaResponse(recordingUi.getLastMessage(), ResponseType.INFO, false);
     }
 
     /**
      * Executes a user command and returns Mona's response for display by a GUI.
      *
      * @param input the command entered by the user.
-     * @return Mona's response text and its visual category.
+     * @return Mona's response text, its visual category, and whether the application should exit.
      */
     public MonaResponse getResponse(String input) {
         recordingUi.clearLastMessage();
         ResponseType responseType;
+        boolean isExit = false;
         try {
             Command command = Parser.parse(input);
             command.execute(tasks, recordingUi, storage);
             responseType = command.getResponseType();
+            isExit = command.isExit();
         } catch (MonaException exception) {
             recordingUi.showMessage(exception.getMessage());
             responseType = ResponseType.ERROR;
         }
         String response = recordingUi.getLastMessage();
         assert response != null : "Every command path must produce a UI response";
-        return new MonaResponse(response, responseType);
+        return new MonaResponse(response, responseType, isExit);
     }
 
     /**

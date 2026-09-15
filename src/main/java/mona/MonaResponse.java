@@ -7,8 +7,9 @@ import java.util.Objects;
  *
  * @param text the message shown to the user.
  * @param type the visual category of the message.
+ * @param isExit whether the application should close after this response is shown.
  */
-public record MonaResponse(String text, ResponseType type) {
+public record MonaResponse(String text, ResponseType type, boolean isExit) {
     /**
      * Creates a response with non-null text and type values.
      */
