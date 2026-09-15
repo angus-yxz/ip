@@ -1,6 +1,7 @@
 package mona;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Path;
@@ -14,6 +15,29 @@ import org.junit.jupiter.api.io.TempDir;
 public class MonaTest {
     @TempDir
     private Path temporaryDirectory;
+
+    @Test
+    public void getWelcomeResponse_bannerExcluded_returnsMessageWithoutBanner() {
+        Mona mona = new Mona(temporaryDirectory.resolve("mona.txt").toString());
+
+        MonaResponse response = mona.getWelcomeResponse(false);
+
+        assertEquals(ResponseType.INFO, response.type());
+        assertTrue(response.text().contains("✨ Hello, I'm Mona."));
+        assertTrue(response.text().contains("What fate shall we divine?"));
+        assertFalse(response.text().contains("__  __"));
+    }
+
+    @Test
+    public void getWelcomeResponse_bannerIncluded_returnsMessageWithBanner() {
+        Mona mona = new Mona(temporaryDirectory.resolve("mona.txt").toString());
+
+        MonaResponse response = mona.getWelcomeResponse(true);
+
+        assertEquals(ResponseType.INFO, response.type());
+        assertTrue(response.text().contains("__  __"));
+        assertTrue(response.text().contains("✨ Hello, I'm Mona."));
+    }
 
     @Test
     public void getResponse_validCommand_executesCommandAndReturnsOutput() {

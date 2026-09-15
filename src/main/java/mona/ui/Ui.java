@@ -29,11 +29,14 @@ public class Ui {
     }
 
     /**
-     * Shows Mona's banner and welcome message.
+     * Shows Mona's welcome message, optionally preceded by the text banner.
+     *
+     * @param includeBanner whether to include the monospaced text banner.
      */
-    public void showWelcome() {
-        showMessage(BANNER
-                + "\n✨ Hello, I'm Mona.\nThe constellations lie reflected in the water tonight. "
+    public void showWelcome(boolean includeBanner) {
+        String banner = includeBanner ? BANNER + "\n" : "";
+        showMessage(banner
+                + "✨ Hello, I'm Mona.\nThe constellations lie reflected in the water tonight. "
                 + "What fate shall we divine?");
     }
 

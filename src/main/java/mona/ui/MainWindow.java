@@ -42,6 +42,8 @@ public class MainWindow extends AnchorPane {
      */
     public void setMona(Mona mona) {
         this.mona = mona;
+        dialogContainer.getChildren().add(
+                DialogBox.getMonaDialog(mona.getWelcomeResponse(false), monaImage));
     }
 
     @FXML
