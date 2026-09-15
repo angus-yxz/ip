@@ -180,3 +180,7 @@ a command window opened in that same folder:
 ```
 java -jar "duke.jar"
 ```
+
+## Source code
+
+Mona's source code is available on [GitHub](https://github.com/angus-yxz/ip).
