@@ -32,9 +32,9 @@ To build a standalone executable JAR (bundling all dependencies), run:
 ./gradlew shadowJar
 ```
 
-This produces `build/libs/duke.jar`. Copy that file into an empty folder and run it from
+This produces `build/libs/mona.jar`. Copy that file into an empty folder and run it from
 a command window opened in that same folder:
 
 ```
-java -jar "duke.jar"
+java -jar "mona.jar"
 ```

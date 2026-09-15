@@ -10,11 +10,11 @@ short commands. It's named after the Genshin Impact character _Mona_.
 ### Quick start
 
 1. Ensure you have Java 25 installed.
-2. Download `duke.jar` (see [Packaging as a JAR file](#packaging-as-a-jar-file) below,
+2. Download `mona.jar` (see [Packaging as a JAR file](#packaging-as-a-jar-file) below,
    or grab it from your instructor if provided) and copy it into an empty folder.
 3. Open a command window in that folder and run:
    ```
-   java -jar duke.jar
+   java -jar mona.jar
    ```
 4. Type a command in the input box and press Enter (or click Send) to talk to Mona.
    Your tasks are saved automatically to a `data` folder next to the jar, so they're
@@ -174,11 +174,11 @@ To build a standalone executable JAR (bundling all dependencies), run:
 ./gradlew shadowJar
 ```
 
-This produces `build/libs/duke.jar`. Copy that file into an empty folder and run it from
+This produces `build/libs/mona.jar`. Copy that file into an empty folder and run it from
 a command window opened in that same folder:
 
 ```
-java -jar "duke.jar"
+java -jar "mona.jar"
 ```
 
 ## Source code
