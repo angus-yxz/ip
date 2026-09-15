@@ -13,6 +13,8 @@ import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import mona.MonaResponse;
+import mona.ResponseType;
 
 /**
  * Represents one user or Mona message with the speaker's display picture.
@@ -51,14 +53,23 @@ public class DialogBox extends HBox {
     /**
      * Returns a left-aligned dialog containing a response from Mona.
      *
-     * @param text Mona's response.
+     * @param response Mona's response text and visual category.
      * @param image Mona's display picture.
      * @return Mona's dialog box.
      */
-    public static DialogBox getMonaDialog(String text, Image image) {
-        DialogBox dialogBox = new DialogBox(text, image);
+    public static DialogBox getMonaDialog(MonaResponse response, Image image) {
+        DialogBox dialogBox = new DialogBox(response.text(), image);
         dialogBox.flip();
+        dialogBox.dialog.getStyleClass().add(getResponseStyleClass(response.type()));
         return dialogBox;
+    }
+
+    private static String getResponseStyleClass(ResponseType responseType) {
+        return switch (responseType) {
+            case INFO -> "info-label";
+            case SUCCESS -> "success-label";
+            case ERROR -> "error-label";
+        };
     }
 
     private void flip() {

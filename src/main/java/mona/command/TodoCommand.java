@@ -1,6 +1,7 @@
 package mona.command;
 
 import mona.MonaException;
+import mona.ResponseType;
 import mona.storage.Storage;
 import mona.task.TaskList;
 import mona.task.Todo;
@@ -24,5 +25,10 @@ public class TodoCommand extends Command {
     @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) throws MonaException {
         addTask(tasks, new Todo(description), storage, ui);
+    }
+
+    @Override
+    public ResponseType getResponseType() {
+        return ResponseType.SUCCESS;
     }
 }

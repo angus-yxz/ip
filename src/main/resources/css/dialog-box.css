@@ -11,6 +11,21 @@
     -fx-border-radius: 1em 1em 1em 0;
 }
 
+.info-label {
+    -fx-background-color: linear-gradient(to bottom right, #2563eb, #1d4ed8);
+    -fx-border-color: #1e3a8a;
+}
+
+.success-label {
+    -fx-background-color: linear-gradient(to bottom right, #15803d, #166534);
+    -fx-border-color: #14532d;
+}
+
+.error-label {
+    -fx-background-color: linear-gradient(to bottom right, #dc2626, #b91c1c);
+    -fx-border-color: #7f1d1d;
+}
+
 #displayPicture {
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0.5, 5, 5);
     -fx-scale-x: 1;

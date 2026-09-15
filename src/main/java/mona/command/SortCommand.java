@@ -1,6 +1,7 @@
 package mona.command;
 
 import mona.MonaException;
+import mona.ResponseType;
 import mona.storage.Storage;
 import mona.task.TaskList;
 import mona.ui.Ui;
@@ -20,5 +21,10 @@ public class SortCommand extends Command {
         tasks.sortChronologically();
         storage.save(tasks.asList());
         ui.showMessage("✅ The constellations align. Your tasks are now in chronological order.");
+    }
+
+    @Override
+    public ResponseType getResponseType() {
+        return ResponseType.SUCCESS;
     }
 }

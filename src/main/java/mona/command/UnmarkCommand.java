@@ -1,6 +1,7 @@
 package mona.command;
 
 import mona.MonaException;
+import mona.ResponseType;
 import mona.storage.Storage;
 import mona.task.Task;
 import mona.task.TaskList;
@@ -28,6 +29,11 @@ public class UnmarkCommand extends Command {
         Task task = tasks.get(taskIndex);
         task.markAsNotDone();
         storage.save(tasks.asList());
-        ui.showMessage("❌ The constellation fades. I've marked this task as not done yet:\n  " + task);
+        ui.showMessage("✅ The constellation fades. I've marked this task as not done yet:\n  " + task);
+    }
+
+    @Override
+    public ResponseType getResponseType() {
+        return ResponseType.SUCCESS;
     }
 }
