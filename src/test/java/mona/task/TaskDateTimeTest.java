@@ -71,6 +71,16 @@ public class TaskDateTimeTest {
     }
 
     @Test
+    public void parse_nonexistentDate_throwsDateTimeParseException() {
+        assertThrows(DateTimeParseException.class, () -> TaskDateTime.parse("2019-02-30"));
+    }
+
+    @Test
+    public void parse_invalidTime_throwsDateTimeParseException() {
+        assertThrows(DateTimeParseException.class, () -> TaskDateTime.parse("2019-10-15 2400"));
+    }
+
+    @Test
     public void toSaveFormat_dateOnly_returnsOriginalInputFormat() {
         TaskDateTime dateTime = TaskDateTime.parse("2019-10-15");
 

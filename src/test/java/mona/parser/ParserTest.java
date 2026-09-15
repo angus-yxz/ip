@@ -122,6 +122,16 @@ public class ParserTest {
     }
 
     @Test
+    public void parse_commandWithSurroundingWhitespace_returnsCommand() throws MonaException {
+        assertInstanceOf(ListCommand.class, Parser.parse("  list  "));
+    }
+
+    @Test
+    public void parse_commandWithMultipleSpacesBeforeArguments_returnsCommand() throws MonaException {
+        assertInstanceOf(TodoCommand.class, Parser.parse("todo   read book"));
+    }
+
+    @Test
     public void parseTodoDescription_validDescription_returnsDescription() throws MonaException {
         assertEquals("read book", Parser.parseTodoDescription("todo read book"));
     }
@@ -134,6 +144,12 @@ public class ParserTest {
     @Test
     public void parseTodoDescription_blankDescription_throwsMonaException() {
         assertThrows(MonaException.class, () -> Parser.parseTodoDescription("todo   "));
+    }
+
+    @Test
+    public void parseTodoDescription_pipeInDescription_throwsMonaException() {
+        assertThrows(MonaException.class, () ->
+                Parser.parseTodoDescription("todo read | write"));
     }
 
     @Test
@@ -169,6 +185,15 @@ public class ParserTest {
     }
 
     @Test
+    public void parseDeadline_extraWhitespace_returnsExpectedArguments() throws MonaException {
+        DeadlineArguments arguments = Parser.parseDeadline(
+                "deadline   return book   /by   2019-10-15");
+
+        assertEquals("return book", arguments.description());
+        assertEquals(LocalDate.of(2019, 10, 15), arguments.deadline().toLocalDate());
+    }
+
+    @Test
     public void parseDeadline_missingSeparator_throwsMonaException() {
         assertThrows(MonaException.class, () -> Parser.parseDeadline("deadline return book"));
     }
@@ -189,6 +214,13 @@ public class ParserTest {
     public void parseDeadline_invalidDate_throwsMonaException() {
         assertThrows(MonaException.class, () ->
                 Parser.parseDeadline("deadline return book /by not-a-date"));
+    }
+
+    @Test
+    public void parseDeadline_duplicateByParameter_throwsMonaException() {
+        assertThrows(MonaException.class, () ->
+                Parser.parseDeadline(
+                        "deadline return book /by 2019-10-15 /by 2019-10-16"));
     }
 
     @Test
@@ -235,6 +267,27 @@ public class ParserTest {
     public void parseEvent_invalidStartDate_throwsMonaException() {
         assertThrows(MonaException.class, () ->
                 Parser.parseEvent("event meeting /from bad-date /to 2019-10-16"));
+    }
+
+    @Test
+    public void parseEvent_sameStartAndEnd_throwsMonaException() {
+        assertThrows(MonaException.class, () ->
+                Parser.parseEvent(
+                        "event meeting /from 2019-10-15 /to 2019-10-15"));
+    }
+
+    @Test
+    public void parseEvent_endBeforeStart_throwsMonaException() {
+        assertThrows(MonaException.class, () ->
+                Parser.parseEvent(
+                        "event meeting /from 2019-10-16 /to 2019-10-15"));
+    }
+
+    @Test
+    public void parseEvent_duplicateFromParameter_throwsMonaException() {
+        assertThrows(MonaException.class, () ->
+                Parser.parseEvent("event meeting /from 2019-10-15 "
+                        + "/from 2019-10-16 /to 2019-10-17"));
     }
 
     @Test
@@ -319,5 +372,10 @@ public class ParserTest {
     @Test
     public void parseDate_invalidDate_throwsMonaException() {
         assertThrows(MonaException.class, () -> Parser.parseDate("garbage", "hint text"));
+    }
+
+    @Test
+    public void parseDate_nonexistentDate_throwsMonaException() {
+        assertThrows(MonaException.class, () -> Parser.parseDate("2019-02-30", "hint text"));
     }
 }

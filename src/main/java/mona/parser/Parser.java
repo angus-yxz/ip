@@ -2,6 +2,8 @@ package mona.parser;
 
 import java.time.format.DateTimeParseException;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import mona.MonaException;
 import mona.command.Command;
@@ -24,9 +26,12 @@ import mona.task.TaskDateTime;
  * Parses and validates arguments from commands entered by the user.
  */
 public final class Parser {
-    private static final String DEADLINE_SEPARATOR = " /by ";
-    private static final String EVENT_START_SEPARATOR = " /from ";
-    private static final String EVENT_END_SEPARATOR = " /to ";
+    private static final Pattern DEADLINE_SEPARATOR_PATTERN =
+            Pattern.compile("(?<!\\S)/by(?!\\S)");
+    private static final Pattern EVENT_START_SEPARATOR_PATTERN =
+            Pattern.compile("(?<!\\S)/from(?!\\S)");
+    private static final Pattern EVENT_END_SEPARATOR_PATTERN =
+            Pattern.compile("(?<!\\S)/to(?!\\S)");
 
     private Parser() {
     }
@@ -45,7 +50,8 @@ public final class Parser {
                     "list");
         }
 
-        Optional<CommandWord> parsedCommandWord = CommandWord.from(userInput);
+        String trimmedInput = userInput.trim();
+        Optional<CommandWord> parsedCommandWord = CommandWord.from(trimmedInput);
         if (parsedCommandWord.isEmpty()) {
             throw MonaException.withHint(
                     "❌ That command is not written in the stars I can read. "
@@ -61,21 +67,21 @@ public final class Parser {
             case BYE -> new ExitCommand();
             case LIST -> new ListCommand();
             case SORT -> new SortCommand();
-            case FIND -> new FindCommand(parseFindKeyword(userInput));
-            case MARK -> new MarkCommand(parseTaskNumber(userInput, CommandWord.MARK));
-            case UNMARK -> new UnmarkCommand(parseTaskNumber(userInput, CommandWord.UNMARK));
-            case DELETE -> new DeleteCommand(parseTaskNumber(userInput, CommandWord.DELETE));
-            case TODO -> new TodoCommand(parseTodoDescription(userInput));
+            case FIND -> new FindCommand(parseFindKeyword(trimmedInput));
+            case MARK -> new MarkCommand(parseTaskNumber(trimmedInput, CommandWord.MARK));
+            case UNMARK -> new UnmarkCommand(parseTaskNumber(trimmedInput, CommandWord.UNMARK));
+            case DELETE -> new DeleteCommand(parseTaskNumber(trimmedInput, CommandWord.DELETE));
+            case TODO -> new TodoCommand(parseTodoDescription(trimmedInput));
             case DEADLINE -> {
-                DeadlineArguments arguments = parseDeadline(userInput);
+                DeadlineArguments arguments = parseDeadline(trimmedInput);
                 yield new DeadlineCommand(arguments.description(), arguments.deadline());
             }
             case EVENT -> {
-                EventArguments arguments = parseEvent(userInput);
+                EventArguments arguments = parseEvent(trimmedInput);
                 yield new EventCommand(arguments.description(), arguments.start(), arguments.end());
             }
-            case ON -> new OnCommand(parseOnDate(userInput));
-            case IN -> new InCommand(parseDaysAhead(userInput));
+            case ON -> new OnCommand(parseOnDate(trimmedInput));
+            case IN -> new InCommand(parseDaysAhead(trimmedInput));
         };
     }
 
@@ -88,13 +94,9 @@ public final class Parser {
      */
     public static String parseTodoDescription(String userInput) throws MonaException {
         String description = CommandWord.TODO.extractArguments(userInput);
-        if (description.trim().isEmpty()) {
-            throw MonaException.withHint(
-                    "❌ A todo needs a name before its fate can be charted.",
-                    "todo read book");
-        }
-
-        return description;
+        return validateDescription(description,
+                "❌ A todo needs a name before its fate can be charted.",
+                "todo read book");
     }
 
     /**
@@ -124,28 +126,31 @@ public final class Parser {
      */
     public static DeadlineArguments parseDeadline(String userInput) throws MonaException {
         String arguments = CommandWord.DEADLINE.extractArguments(userInput);
-        int separatorIndex = arguments.indexOf(DEADLINE_SEPARATOR);
-        if (separatorIndex < 0) {
+        Matcher separatorMatcher = DEADLINE_SEPARATOR_PATTERN.matcher(arguments);
+        if (!separatorMatcher.find()) {
             throw MonaException.withHint(
                     "❌ Even the stars need a fixed point. Specify the deadline using /by.",
                     "deadline return book /by 2019-10-15");
         }
-
-        String description = arguments.substring(0, separatorIndex);
-        String deadlineText = arguments.substring(separatorIndex + DEADLINE_SEPARATOR.length());
-        if (description.trim().isEmpty()) {
+        int separatorStart = separatorMatcher.start();
+        int separatorEnd = separatorMatcher.end();
+        if (separatorMatcher.find()) {
             throw MonaException.withHint(
-                    "❌ A deadline needs a name before its fate can be charted.",
+                    "❌ A deadline can have only one /by parameter.",
                     "deadline return book /by 2019-10-15");
         }
-        if (deadlineText.trim().isEmpty()) {
+
+        String hint = "deadline return book /by 2019-10-15";
+        String description = validateDescription(arguments.substring(0, separatorStart),
+                "❌ A deadline needs a name before its fate can be charted.", hint);
+        String deadlineText = arguments.substring(separatorEnd).trim();
+        if (deadlineText.isEmpty()) {
             throw MonaException.withHint(
                     "❌ A deadline needs a point in time. Tell me when it falls due after /by.",
-                    "deadline return book /by 2019-10-15");
+                    hint);
         }
 
-        TaskDateTime deadline = parseDate(deadlineText.trim(),
-                "deadline return book /by 2019-10-15");
+        TaskDateTime deadline = parseDate(deadlineText, hint);
         return new DeadlineArguments(description, deadline);
     }
 
@@ -158,40 +163,49 @@ public final class Parser {
      */
     public static EventArguments parseEvent(String userInput) throws MonaException {
         String arguments = CommandWord.EVENT.extractArguments(userInput);
-        int startSeparatorIndex = arguments.indexOf(EVENT_START_SEPARATOR);
-        int endSeparatorIndex = arguments.indexOf(EVENT_END_SEPARATOR,
-                startSeparatorIndex + EVENT_START_SEPARATOR.length());
-        if (startSeparatorIndex < 0 || endSeparatorIndex < 0) {
-            // /from and /to are both present, but /to comes before /from: point the user at the
-            // ordering rather than reporting them as missing.
-            if (startSeparatorIndex >= 0 && arguments.indexOf(EVENT_END_SEPARATOR) >= 0) {
-                throw MonaException.withHint(
-                        "❌ Fate flows only forward. Place /from before /to.",
-                        "event project meeting /from 2019-10-15 /to 2019-10-16");
-            }
+        Matcher startSeparatorMatcher = EVENT_START_SEPARATOR_PATTERN.matcher(arguments);
+        Matcher endSeparatorMatcher = EVENT_END_SEPARATOR_PATTERN.matcher(arguments);
+        boolean hasStartSeparator = startSeparatorMatcher.find();
+        boolean hasEndSeparator = endSeparatorMatcher.find();
+        String hint = "event project meeting /from 2019-10-15 /to 2019-10-16";
+        if (!hasStartSeparator || !hasEndSeparator) {
             throw MonaException.withHint(
                     "❌ Fate needs both a dawn and a dusk. Specify the event using /from and /to.",
-                    "event project meeting /from 2019-10-15 /to 2019-10-16");
+                    hint);
         }
 
-        String description = arguments.substring(0, startSeparatorIndex);
-        String startText = arguments.substring(
-                startSeparatorIndex + EVENT_START_SEPARATOR.length(), endSeparatorIndex);
-        String endText = arguments.substring(endSeparatorIndex + EVENT_END_SEPARATOR.length());
-        if (description.trim().isEmpty()) {
+        int startSeparatorStart = startSeparatorMatcher.start();
+        int startSeparatorEnd = startSeparatorMatcher.end();
+        int endSeparatorStart = endSeparatorMatcher.start();
+        int endSeparatorEnd = endSeparatorMatcher.end();
+        if (startSeparatorMatcher.find() || endSeparatorMatcher.find()) {
             throw MonaException.withHint(
-                    "❌ An event needs a name before its fate can be charted.",
-                    "event project meeting /from 2019-10-15 /to 2019-10-16");
+                    "❌ An event can have only one /from and one /to parameter.",
+                    hint);
         }
-        if (startText.trim().isEmpty() || endText.trim().isEmpty()) {
+        if (startSeparatorStart > endSeparatorStart) {
+            throw MonaException.withHint(
+                    "❌ Fate flows only forward. Place /from before /to.",
+                    hint);
+        }
+
+        String description = validateDescription(arguments.substring(0, startSeparatorStart),
+                "❌ An event needs a name before its fate can be charted.", hint);
+        String startText = arguments.substring(startSeparatorEnd, endSeparatorStart).trim();
+        String endText = arguments.substring(endSeparatorEnd).trim();
+        if (startText.isEmpty() || endText.isEmpty()) {
             throw MonaException.withHint(
                     "❌ An event needs both a dawn and a dusk. Fill in /from and /to.",
-                    "event project meeting /from 2019-10-15 /to 2019-10-16");
+                    hint);
         }
 
-        String hint = "event project meeting /from 2019-10-15 /to 2019-10-16";
-        TaskDateTime start = parseDate(startText.trim(), hint);
-        TaskDateTime end = parseDate(endText.trim(), hint);
+        TaskDateTime start = parseDate(startText, hint);
+        TaskDateTime end = parseDate(endText, hint);
+        if (start.compareTo(end) >= 0) {
+            throw MonaException.withHint(
+                    "❌ An event must end after it starts.",
+                    hint);
+        }
         return new EventArguments(description, start, end);
     }
 
@@ -289,6 +303,20 @@ public final class Parser {
                             + "24-hour time, such as 2019-10-15 or 2019-10-15 1800.",
                     hint);
         }
+    }
+
+    private static String validateDescription(String description, String missingMessage, String hint)
+            throws MonaException {
+        String trimmedDescription = description.trim();
+        if (trimmedDescription.isEmpty()) {
+            throw MonaException.withHint(missingMessage, hint);
+        }
+        if (trimmedDescription.contains("|")) {
+            throw MonaException.withHint(
+                    "❌ Task descriptions cannot contain the | character.",
+                    hint);
+        }
+        return trimmedDescription;
     }
 
     /**

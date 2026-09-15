@@ -93,6 +93,23 @@ public class StorageTest {
         assertEquals(List.of("T | 0 | read book"), toSaveFormats(loadedTasks));
     }
 
+    @Test
+    public void load_fileContainsInvalidFieldValues_skipsInvalidLines() throws Exception {
+        Path filePath = tempDir.resolve("mona.txt");
+        Files.write(filePath, List.of(
+                "T | 0 | valid task",
+                "T | maybe | invalid done flag",
+                "T | 0 | ",
+                "T | 0 | too | many fields",
+                "E | 0 | backwards | 2019-10-16 | 2019-10-15",
+                "D | 0 | invalid date | 2019-02-30"), StandardCharsets.UTF_8);
+        Storage storage = new Storage(filePath.toString());
+
+        ArrayList<Task> loadedTasks = storage.load();
+
+        assertEquals(List.of("T | 0 | valid task"), toSaveFormats(loadedTasks));
+    }
+
     private static List<String> toSaveFormats(List<Task> tasks) {
         return tasks.stream().map(Task::toSaveFormat).toList();
     }

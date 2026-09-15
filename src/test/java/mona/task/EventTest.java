@@ -2,6 +2,7 @@ package mona.task;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDate;
@@ -51,11 +52,15 @@ public class EventTest {
     }
 
     @Test
-    public void occursOn_singleDayEventDate_returnsTrue() {
+    public void constructor_sameStartAndEnd_throwsIllegalArgumentException() {
         TaskDateTime date = TaskDateTime.parse("2019-10-15");
-        Event event = new Event("workshop", date, date);
 
-        assertTrue(event.occursOn(LocalDate.of(2019, 10, 15)));
+        assertThrows(IllegalArgumentException.class, () -> new Event("workshop", date, date));
+    }
+
+    @Test
+    public void constructor_endBeforeStart_throwsIllegalArgumentException() {
+        assertThrows(IllegalArgumentException.class, () -> new Event("workshop", END, START));
     }
 
     @Test

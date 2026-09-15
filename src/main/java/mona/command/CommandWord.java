@@ -51,9 +51,7 @@ public enum CommandWord {
      */
     public String extractArguments(String userInput) {
         assert matches(userInput) : "Input must invoke this command before extracting arguments";
-        return userInput.length() == commandWord.length()
-                ? ""
-                : userInput.substring(commandWord.length() + 1);
+        return userInput.substring(commandWord.length()).trim();
     }
 
     /**
@@ -68,6 +66,9 @@ public enum CommandWord {
 
     private boolean matches(String userInput) {
         return userInput.equals(commandWord)
-                || hasArguments && userInput.startsWith(commandWord + " ");
+                || hasArguments
+                        && userInput.startsWith(commandWord)
+                        && userInput.length() > commandWord.length()
+                        && Character.isWhitespace(userInput.charAt(commandWord.length()));
     }
 }

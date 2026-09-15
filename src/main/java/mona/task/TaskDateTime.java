@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.time.format.ResolverStyle;
 
 /**
  * Represents a date, optionally with a time of day, used for deadlines and events.
@@ -15,8 +16,11 @@ import java.time.format.DateTimeParseException;
 public final class TaskDateTime implements Comparable<TaskDateTime> {
     // Input formats accepted from the user and from the data file.
     private static final DateTimeFormatter INPUT_DATE_TIME_FORMAT =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd HHmm");
-    private static final DateTimeFormatter INPUT_DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            DateTimeFormatter.ofPattern("uuuu-MM-dd HHmm")
+                    .withResolverStyle(ResolverStyle.STRICT);
+    private static final DateTimeFormatter INPUT_DATE_FORMAT =
+            DateTimeFormatter.ofPattern("uuuu-MM-dd")
+                    .withResolverStyle(ResolverStyle.STRICT);
 
     // Display format shown to the user, e.g. "Oct 15 2019, 6:00 pm".
     private static final DateTimeFormatter DISPLAY_DATE_TIME_FORMAT =
