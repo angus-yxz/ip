@@ -122,34 +122,43 @@ public class Storage {
      * @throws MonaException if the line does not match the expected format.
      */
     private Task parseTask(String line) throws MonaException {
-        String[] fields = line.split(FIELD_SEPARATOR_REGEX);
+        String[] fields = line.split(FIELD_SEPARATOR_REGEX, -1);
         if (fields.length < 3) {
             throw new MonaException("Expected at least 3 fields, found " + fields.length);
         }
 
         String typeCode = fields[0].trim();
-        boolean isDone = DONE_FLAG.equals(fields[1].trim());
-        String description = fields[2];
+        int expectedFieldCount = switch (typeCode) {
+            case "T" -> 3;
+            case "D" -> 4;
+            case "E" -> 5;
+            default -> throw new MonaException("Unknown task type: " + typeCode);
+        };
+        if (fields.length != expectedFieldCount) {
+            throw new MonaException(
+                    "Expected " + expectedFieldCount + " fields, found " + fields.length);
+        }
+
+        String doneFlag = fields[1].trim();
+        if (!doneFlag.equals("0") && !doneFlag.equals(DONE_FLAG)) {
+            throw new MonaException("Done flag must be 0 or 1");
+        }
+        boolean isDone = DONE_FLAG.equals(doneFlag);
+        String description = fields[2].trim();
+        if (description.isEmpty()) {
+            throw new MonaException("Task description cannot be empty");
+        }
 
         Task task;
-        switch (typeCode) {
-            case "T":
-                task = new Todo(description);
-                break;
-            case "D":
-                if (fields.length < 4) {
-                    throw new MonaException("Deadline is missing its /by field");
-                }
-                task = new Deadline(description, parseDate(fields[3]));
-                break;
-            case "E":
-                if (fields.length < 5) {
-                    throw new MonaException("Event is missing its /from or /to field");
-                }
-                task = new Event(description, parseDate(fields[3]), parseDate(fields[4]));
-                break;
-            default:
-                throw new MonaException("Unknown task type: " + typeCode);
+        try {
+            task = switch (typeCode) {
+                case "T" -> new Todo(description);
+                case "D" -> new Deadline(description, parseDate(fields[3]));
+                case "E" -> new Event(description, parseDate(fields[3]), parseDate(fields[4]));
+                default -> throw new AssertionError("Task type was validated above");
+            };
+        } catch (IllegalArgumentException exception) {
+            throw new MonaException(exception.getMessage());
         }
 
         if (isDone) {
