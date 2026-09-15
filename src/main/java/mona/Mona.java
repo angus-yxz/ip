@@ -7,7 +7,7 @@ import mona.task.TaskList;
 import mona.ui.Ui;
 
 /**
- * Provides a command-line task manager named Mona.
+ * Provides the task-management logic used by Mona's command-line and graphical interfaces.
  */
 public class Mona {
     // Relative to the working directory the program is run from, per the project's
@@ -57,7 +57,7 @@ public class Mona {
             tasks = new TaskList();
         }
 
-        ui.showWelcome();
+        ui.showWelcome(true);
         boolean isExit = false;
         while (!isExit) {
             try {
@@ -69,6 +69,18 @@ public class Mona {
                 ui.showMessage(exception.getMessage());
             }
         }
+    }
+
+    /**
+     * Returns Mona's startup greeting, optionally preceded by the text banner.
+     *
+     * @param includeBanner whether to include the monospaced text banner.
+     * @return the startup greeting as an informational response.
+     */
+    public MonaResponse getWelcomeResponse(boolean includeBanner) {
+        recordingUi.clearLastMessage();
+        recordingUi.showWelcome(includeBanner);
+        return new MonaResponse(recordingUi.getLastMessage(), ResponseType.INFO);
     }
 
     /**
