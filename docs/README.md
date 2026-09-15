@@ -3,6 +3,8 @@
 Mona is a desktop chatbot that helps you track todos, deadlines, and events by typing
 short commands. It's named after the Genshin Impact character _Mona_.
 
+![Mona's chat window, showing a task list, an added event, and a success message](Ui.png)
+
 ## User Guide
 
 ### Quick start
