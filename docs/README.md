@@ -30,6 +30,7 @@ short commands. It's named after the Genshin Impact character _Mona_.
 > * Extra whitespace around parameters is ignored.
 > * Mona's replies are colour-coded: blue for general information, green for a
 >   successful change, and red for an error.
+> * Commands are case-sensitive, e.g. `todo` works but `Todo` does not.
 
 #### Adding a todo: `todo`
 
