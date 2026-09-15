@@ -52,6 +52,18 @@ public class MonaTest {
     }
 
     @Test
+    public void getResponse_eventCommand_addsEventTask() {
+        Mona mona = new Mona(temporaryDirectory.resolve("mona.txt").toString());
+
+        MonaResponse response = mona.getResponse("event project meeting /from 2019-10-15 /to 2019-10-16");
+
+        assertEquals(ResponseType.SUCCESS, response.type());
+        assertTrue(response.text().contains("I've added this task:"));
+        assertTrue(response.text().contains("[E][ ] project meeting (from: Oct 15 2019 to: Oct 16 2019)"));
+        assertTrue(response.text().contains("Now you have 1 tasks in the list."));
+    }
+
+    @Test
     public void getResponse_invalidCommand_returnsValidationError() {
         Mona mona = new Mona(temporaryDirectory.resolve("mona.txt").toString());
 
